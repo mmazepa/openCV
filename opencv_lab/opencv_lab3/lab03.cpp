@@ -6,13 +6,28 @@
 using namespace cv;
 using namespace std;
 
+void cleanUpOnExit(VideoCapture cap) {
+	cap.release();
+	destroyAllWindows();
+}
+
+void pressAnyKey() {
+	cout << "The end, press ANY key to exit..." << endl;
+	_getch();
+}
+
+String getPath(String videoName) {
+	String path = "C:/Users/Mariusz/Desktop/opencv_tmp/";
+	return path + "/" + videoName + "/" + videoName + ".avi";
+}
+
 int main() {
 	Mat firstFrame, currentFrame, previousFrame;
 	Mat diff, eroded, dilated;
 	Mat gray, prev_gray;
 
 	VideoCapture cap;
-	cap.open("C:/Users/Mariusz/Desktop/opencv_tmp/robot_no_loop/robot_no_loop.avi");
+	cap.open(getPath("robot_no_loop"));
 
 	namedWindow("window", CV_WINDOW_AUTOSIZE);
 
@@ -28,10 +43,8 @@ int main() {
 		try {
 			cap >> currentFrame;
 			if (currentFrame.empty()) {
-				cout << "The end, press ANY key to exit..." << endl;
-				_getch();
-				cap.release();
-				destroyAllWindows();
+				pressAnyKey();
+				cleanUpOnExit(cap);
 				return 0;
 			}
 
@@ -51,8 +64,7 @@ int main() {
 			cap.open(1);
 		}
 		if (waitKey(15) == 27) {
-			cap.release();
-			destroyAllWindows();
+			cleanUpOnExit(cap);
 			return 0;
 		}
 	}
