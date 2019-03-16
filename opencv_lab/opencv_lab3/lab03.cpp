@@ -16,9 +16,17 @@ void pressAnyKey() {
 	_getch();
 }
 
-String getPath(String videoName) {
+String getPath(String folderName, String fileName, String extension) {
 	String path = "C:/Users/Mariusz/Desktop/opencv_tmp/";
-	return path + "/" + videoName + "/" + videoName + ".avi";
+	return path + "/" + folderName + "/" + fileName + "." + extension;
+}
+
+String getVideoPath(String videoName) {
+	return getPath(videoName, videoName, "avi");
+}
+
+String getLogoPath(String folderName, String logoName) {
+	return getPath(folderName, logoName, "bmp");
 }
 
 Mat motionDetection(VideoCapture cap, Mat currentFrame, Mat frameToCompare, int threshold_value, int erode_value, int dilate_value) {
@@ -39,7 +47,7 @@ int motionDetector(VideoCapture cap, int choice) {
 	namedWindow("modified", CV_WINDOW_AUTOSIZE);
 
 	if (choice == 1 || choice == 2) {
-		cap.open(getPath("robot_no_loop"));
+		cap.open(getVideoPath("robot_no_loop"));
 	} else if (choice == 3 || choice == 4) {
 		cap.open(0);
 	}
@@ -79,12 +87,17 @@ int motionDetector(VideoCapture cap, int choice) {
 int addLogo(VideoCapture cap, int choice) {
 	Mat frame;
 
+	namedWindow("window", CV_WINDOW_AUTOSIZE);
+
 	if (choice == 5) {
-		cap.open(getPath("robot_no_loop"));
+		cap.open(getVideoPath("robot_no_loop"));
 	}
 	else if (choice == 6) {
 		cap.open(0);
 	}
+
+	Mat logo = imread(getLogoPath("robot_no_loop", "logo"), IMREAD_UNCHANGED);
+	cout << logo.channels() << endl;
 
 	while (1) {
 		try {
@@ -94,6 +107,8 @@ int addLogo(VideoCapture cap, int choice) {
 				cleanUpOnExit(cap);
 				return 0;
 			}
+			logo.copyTo(frame(cv::Rect(frame.cols-logo.cols, frame.rows-logo.rows, logo.cols, logo.rows)));
+			imshow("window", frame);
 		}
 		catch (Exception e) {
 			cap.open(1);
