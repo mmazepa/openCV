@@ -6,6 +6,23 @@
 using namespace cv;
 using namespace std;
 
+const int threshold_max = 255;
+int threshold_value = 50;
+
+const int alpha_max = 100;
+int alpha = alpha_max/2;
+
+string thresholdTrackBarName = "Threshold";
+string alphaTrackBarName = "Alpha";
+
+void on_threshold_trackbar(int, void*) {
+	threshold_value = getTrackbarPos(thresholdTrackBarName, "modified");
+}
+
+void on_alpha_trackbar(int, void*) {
+	alpha = getTrackbarPos(alphaTrackBarName, "modified");
+}
+
 void cleanUpOnExit(VideoCapture cap) {
 	cap.release();
 	destroyAllWindows();
@@ -16,22 +33,23 @@ void pressAnyKey() {
 	_getch();
 }
 
-Mat motionDetection(VideoCapture cap, Mat currentFrame, Mat frameToCompare, int threshold_value, int alpha) {
-	Mat diff;
-	Mat accumulator = Mat::zeros(currentFrame.size(), CV_32FC1);
+Mat motionDetection(VideoCapture cap, Mat currentFrame, Mat frameToCompare, Mat accumulator, int threshold_value, double alpha) {
+	Mat diff;	
 
-	absdiff(frameToCompare, currentFrame, diff);
+	absdiff(currentFrame, frameToCompare, diff);
 	cvtColor(diff, diff, CV_RGB2GRAY);
-	threshold(diff, diff, threshold_value, 255, THRESH_BINARY);
+	threshold(diff, diff, threshold_value, 255, THRESH_BINARY);	
+	//cout << alpha << endl;
 	accumulateWeighted(diff, accumulator, alpha);
 	convertScaleAbs(accumulator, diff);
+	
 	return diff;
 }
 
-int main() {
+int main() {	
 	Mat firstFrame, currentFrame;
 	Mat diff;
-	
+
 	VideoCapture cap;
 
 	String path = "C:/Users/Mariusz/Desktop/opencv_tmp/lab4/";
@@ -48,18 +66,24 @@ int main() {
 	cap >> firstFrame;
 	currentFrame = firstFrame.clone();
 
-	double threshold_value = 30;
-	double alpha = 1.0;
+	Mat accumulator = Mat::zeros(firstFrame.size(), CV_64FC1);
 
-	while (1) {
+	createTrackbar(thresholdTrackBarName, "modified", &threshold_value, threshold_max, on_threshold_trackbar);
+	createTrackbar(alphaTrackBarName, "modified", &alpha, alpha_max, on_alpha_trackbar);
+	
+	while (1) {		
 		try {
 			cap >> currentFrame;
 			if (currentFrame.empty()) {
-				pressAnyKey();
-				cleanUpOnExit(cap);
-				return 0;
+				cap.set(CV_CAP_PROP_POS_FRAMES, 1);
+				cap >> currentFrame;
+				//pressAnyKey();
+				//cleanUpOnExit(cap);
+				//return 0;
 			}
-			diff = motionDetection(cap, currentFrame, firstFrame, threshold_value, alpha);
+			double alpha_value = (double)alpha/alpha_max;
+			//cout << alpha_value << endl;
+			diff = motionDetection(cap, currentFrame, firstFrame, accumulator, threshold_value, alpha_value);
 			imshow("original", currentFrame);
 			imshow("modified", diff);
 		} catch (Exception e) {
