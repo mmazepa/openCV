@@ -8,6 +8,9 @@ using namespace std;
 
 VideoCapture cap;
 
+double dWidth = cap.set(CV_CAP_PROP_FRAME_WIDTH, 640);
+double dHeight = cap.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
+
 const int threshold_max = 255;
 int threshold_value = 50;
 
@@ -72,9 +75,6 @@ int movingAverage(String capture) {
 	namedWindow("original", CV_WINDOW_AUTOSIZE);
 	namedWindow("modified", CV_WINDOW_AUTOSIZE);
 
-	double dWidth = cap.set(CV_CAP_PROP_FRAME_WIDTH, 640);
-	double dHeight = cap.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
-
 	cap >> firstFrame;
 	currentFrame = firstFrame.clone();
 
@@ -116,7 +116,12 @@ string int2str(int num) {
 
 void framesSavedInfo(int framesAmount, String framesPath) {
 	cout << int2str(framesAmount) + " frames saved to " + framesPath << endl;
-	pressAnyKey();
+	//pressAnyKey();
+}
+
+void videoSavedInfo(String videoName, String videoPath) {
+	cout << "\"" + videoName + "\"" + " saved to " + videoPath << endl;
+	//pressAnyKey();
 }
 
 vector<int> setCompressionParams() {
@@ -142,9 +147,7 @@ int askForNumber(String question) {
 	return number;
 }
 
-int videoToFrames(String capture) {
-	int framesAmount = askForNumber("Number of frames:");
-
+int videoToFrames(String capture, int framesAmount) {
 	Mat frame;
 
 	String path = "C:/Users/Mariusz/Desktop/opencv_tmp/lab4/";
@@ -160,6 +163,39 @@ int videoToFrames(String capture) {
 	framesSavedInfo(framesAmount, framesPath);
 
 	cleanUpOnExit(cap);
+	return 0;
+}
+
+int framesToVideo(String outputVideoName, int framesAmount) {
+	String path = "C:/Users/Mariusz/Desktop/opencv_tmp/lab4/";
+	String framesPath = path + "klatki/";
+	
+	VideoWriter outputVideo;
+
+	String outputPath = framesPath + outputVideoName;
+	int codec = CV_FOURCC('M', 'J', 'P', 'G');
+	int fps = 15;
+	double width = cap.get(CV_CAP_PROP_FRAME_WIDTH);
+	double height = cap.get(CV_CAP_PROP_FRAME_HEIGHT);
+	Size size = Size(width, height);
+	
+	outputVideo.open(outputPath, codec, fps, size, true);
+
+	for (int i = 0; i < framesAmount; i++) {
+		Mat frame = imread(framesPath + "Frame" + int2str(i+1) + ".jpg", CV_LOAD_IMAGE_UNCHANGED);
+		outputVideo.write(frame);
+	}
+	outputVideo.release();
+	videoSavedInfo(outputVideoName, framesPath);
+
+	cleanUpOnExit(cap);
+	return 0;
+}
+
+int videoToFramesAndBack(String capture, int framesAmount) {
+	videoToFrames(capture, framesAmount);
+	framesToVideo("aVideo.avi", framesAmount);
+	pressAnyKey();
 	return 0;
 }
 
@@ -181,6 +217,7 @@ void menu() {
 int main() {
 	menu();
 	int choice = askForNumber("Your choice:");
+	int framesAmount;
 
 	switch (choice) {
 		case 1:
@@ -193,22 +230,28 @@ int main() {
 			movingAverage("camera");
 			break;
 		case 4:
-			videoToFrames("bike.avi");
+			framesAmount = askForNumber("Number of frames:");
+			videoToFramesAndBack("bike.avi", framesAmount);
 			break;
 		case 5:
-			videoToFrames("robot_no_loop.avi");
+			framesAmount = askForNumber("Number of frames:");
+			videoToFramesAndBack("robot_no_loop.avi", framesAmount);
 			break;
 		case 6:
-			videoToFrames("camera");
+			framesAmount = askForNumber("Number of frames:");
+			videoToFramesAndBack("camera", framesAmount);
 			break;
 		case 7:
-			destroyAllWindows();
+			cleanUpOnExit(cap);
 			cout << "Good-bye!" << endl;
 			pressAnyKey();
 			break;
 		default:
+			cleanUpOnExit(cap);
 			cout << "Unknown choice." << endl;
 			pressAnyKey();
 			break;
 	}
+
+	return 0;
 }
