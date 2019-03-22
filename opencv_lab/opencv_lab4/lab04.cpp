@@ -69,9 +69,6 @@ int movingAverage(String capture) {
 		cap.open(path + capture);
 	}
 
-	//cap.open(path + "robot_no_loop.avi");
-	//cap.open(path + "bike.avi");
-
 	namedWindow("original", CV_WINDOW_AUTOSIZE);
 	namedWindow("modified", CV_WINDOW_AUTOSIZE);
 
@@ -110,11 +107,60 @@ int movingAverage(String capture) {
 	return 0;
 }
 
+string int2str(int num) {
+	string s;
+	stringstream ss(s);
+	ss << num;
+	return ss.str();
+}
+
+void framesSavedInfo(int framesAmount, String framesPath) {
+	cout << int2str(framesAmount) + " frames saved to " + framesPath << endl;
+	pressAnyKey();
+}
+
+vector<int> setCompressionParams() {
+	vector<int> compression_params;
+	compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
+	compression_params.push_back(100);
+	return compression_params;
+}
+
+void saveFramesLoop(int framesAmount, VideoCapture cap, Mat frame, String framesPath) {
+	for (int i = 1; i <= framesAmount; i++) {
+		cap >> frame;
+		imwrite(framesPath + "Frame" + int2str(i) + ".jpg",
+			frame, setCompressionParams());
+		cout << "Frame" + int2str(i) + ".jpg" << endl;
+	}
+}
+
 int askForNumber(String question) {
 	int number;
 	cout << question << endl;
 	cin >> number;
 	return number;
+}
+
+int videoToFrames(String capture) {
+	int framesAmount = askForNumber("Number of frames:");
+
+	Mat frame;
+
+	String path = "C:/Users/Mariusz/Desktop/opencv_tmp/lab4/";
+	String framesPath = path + "klatki/";
+
+	if (capture == "camera") {
+		cap.open(0);
+	} else {
+		cap.open(path + capture);
+	}
+	
+	saveFramesLoop(framesAmount, cap, frame, framesPath);
+	framesSavedInfo(framesAmount, framesPath);
+
+	cleanUpOnExit(cap);
+	return 0;
 }
 
 void menu() {
@@ -123,8 +169,12 @@ void menu() {
 	cout << "      1 - video (bike.avi)" << endl;
 	cout << "      2 - video (robot_no_loop.avi)" << endl;
 	cout << "      3 - camera" << endl;
+	cout << "   Images to Video" << endl;
+	cout << "      4 - video (bike.avi)" << endl;
+	cout << "      5 - video (robot_no_loop.avi)" << endl;
+	cout << "      6 - camera" << endl;
 	cout << "   Other options" << endl;
-	cout << "      4 - exit" << endl;
+	cout << "      7 - exit" << endl;
 	cout << endl;
 }
 
@@ -143,6 +193,15 @@ int main() {
 			movingAverage("camera");
 			break;
 		case 4:
+			videoToFrames("bike.avi");
+			break;
+		case 5:
+			videoToFrames("robot_no_loop.avi");
+			break;
+		case 6:
+			videoToFrames("camera");
+			break;
+		case 7:
 			destroyAllWindows();
 			cout << "Good-bye!" << endl;
 			pressAnyKey();
