@@ -33,8 +33,8 @@ void cleanUpOnExit(VideoCapture cap) {
 	destroyAllWindows();
 }
 
-void pressAnyKey() {
-	cout << "The end, press ANY key to exit..." << endl;
+void pressAnyKey(String action) {
+	cout << action + ", press ANY key to continue..." << endl;
 	_getch();
 }
 
@@ -57,7 +57,7 @@ Mat playInALoop(Mat currentFrame) {
 }
 
 void exitOnVideoEnd() {
-	pressAnyKey();
+	pressAnyKey("The End of the video");
 	cleanUpOnExit(cap);
 }
 
@@ -116,12 +116,10 @@ string int2str(int num) {
 
 void framesSavedInfo(int framesAmount, String framesPath) {
 	cout << int2str(framesAmount) + " frames saved to " + framesPath << endl;
-	//pressAnyKey();
 }
 
 void videoSavedInfo(String videoName, String videoPath) {
 	cout << "\"" + videoName + "\"" + " saved to " + videoPath << endl;
-	//pressAnyKey();
 }
 
 vector<int> setCompressionParams() {
@@ -166,7 +164,7 @@ int videoToFrames(String capture, int framesAmount) {
 	return 0;
 }
 
-int framesToVideo(String outputVideoName, int framesAmount) {
+int framesToVideo(String outputVideoName, int framesAmount, int fps) {
 	String path = "C:/Users/Mariusz/Desktop/opencv_tmp/lab4/";
 	String framesPath = path + "klatki/";
 	
@@ -174,7 +172,6 @@ int framesToVideo(String outputVideoName, int framesAmount) {
 
 	String outputPath = framesPath + outputVideoName;
 	int codec = CV_FOURCC('M', 'J', 'P', 'G');
-	int fps = 15;
 	double width = cap.get(CV_CAP_PROP_FRAME_WIDTH);
 	double height = cap.get(CV_CAP_PROP_FRAME_HEIGHT);
 	Size size = Size(width, height);
@@ -192,10 +189,13 @@ int framesToVideo(String outputVideoName, int framesAmount) {
 	return 0;
 }
 
-int videoToFramesAndBack(String capture, int framesAmount) {
+int videoToFramesAndBack(String capture) {
+	int framesAmount = askForNumber("Number of frames:");
+	int fps = askForNumber("Number of FPS:");
+
 	videoToFrames(capture, framesAmount);
-	framesToVideo("aVideo.avi", framesAmount);
-	pressAnyKey();
+	framesToVideo("aVideo.avi", framesAmount, fps);
+	pressAnyKey("image->video success");
 	return 0;
 }
 
@@ -217,7 +217,6 @@ void menu() {
 int main() {
 	menu();
 	int choice = askForNumber("Your choice:");
-	int framesAmount;
 
 	switch (choice) {
 		case 1:
@@ -230,26 +229,21 @@ int main() {
 			movingAverage("camera");
 			break;
 		case 4:
-			framesAmount = askForNumber("Number of frames:");
-			videoToFramesAndBack("bike.avi", framesAmount);
+			videoToFramesAndBack("bike.avi");
 			break;
 		case 5:
-			framesAmount = askForNumber("Number of frames:");
-			videoToFramesAndBack("robot_no_loop.avi", framesAmount);
+			videoToFramesAndBack("robot_no_loop.avi");
 			break;
 		case 6:
-			framesAmount = askForNumber("Number of frames:");
-			videoToFramesAndBack("camera", framesAmount);
+			videoToFramesAndBack("camera");
 			break;
 		case 7:
 			cleanUpOnExit(cap);
-			cout << "Good-bye!" << endl;
-			pressAnyKey();
+			pressAnyKey("Good-bye");
 			break;
 		default:
 			cleanUpOnExit(cap);
-			cout << "Unknown choice." << endl;
-			pressAnyKey();
+			pressAnyKey("Unknown choice");
 			break;
 	}
 
