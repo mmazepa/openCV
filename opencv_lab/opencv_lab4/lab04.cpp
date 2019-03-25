@@ -43,7 +43,7 @@ Mat motionDetection(VideoCapture cap, Mat currentFrame, Mat frameToCompare, Mat 
 
 	absdiff(currentFrame, frameToCompare, diff);
 	cvtColor(diff, diff, CV_RGB2GRAY);
-	threshold(diff, diff, threshold_value, 255, THRESH_BINARY);	
+	threshold(diff, diff, threshold_value, 255, THRESH_BINARY);
 	accumulateWeighted(diff, accumulator, alpha);
 	convertScaleAbs(accumulator, diff);
 	
@@ -62,7 +62,7 @@ void exitOnVideoEnd() {
 }
 
 int movingAverage(String capture) {
-	Mat firstFrame, currentFrame;
+	Mat firstFrame, currentFrame, previousFrame;
 	Mat diff;
 
 	if (capture == "camera") {
@@ -77,6 +77,7 @@ int movingAverage(String capture) {
 
 	cap >> firstFrame;
 	currentFrame = firstFrame.clone();
+	previousFrame = currentFrame.clone();
 
 	Mat accumulator = Mat::zeros(firstFrame.size(), CV_64FC1);
 
@@ -91,9 +92,10 @@ int movingAverage(String capture) {
 				//exitOnVideoEnd(); break;
 			}
 			double alpha_value = (double)alpha / alpha_max;
-			diff = motionDetection(cap, currentFrame, firstFrame, accumulator, threshold_value, alpha_value);
+			diff = motionDetection(cap, currentFrame, previousFrame, accumulator, threshold_value, alpha_value);
 			imshow("original", currentFrame);
 			imshow("modified", diff);
+			previousFrame = currentFrame.clone();
 		}
 		catch (Exception e) {
 			cap.open(1);
