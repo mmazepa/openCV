@@ -7,11 +7,13 @@ using namespace cv;
 using namespace std;
 
 Mat frame, frame_gray;
-Mat dst, detected_edges;
+Mat dst, gaussian_effect, detected_edges;
+
 Mat grad, grad_x, grad_y;
 Mat abs_grad_x, abs_grad_y;
 Mat res_gx, res_gy;
-Mat orientation, image;
+
+Mat orientation, colorized_grad, colorized_edges;
 
 int lowThreshold = 50;
 const int max_lowThreshold = 255;
@@ -39,7 +41,8 @@ const char* window_name2 = "Canny";
 const char* window_name3 = "Grad_X";
 const char* window_name4 = "Grad_Y";
 const char* window_name5 = "Grad";
-const char* window_name6 = "Colorized";
+const char* window_name6 = "Colorized_Grad";
+const char* window_name7 = "Colorized_Edges";
 
 char* trackbar_name = "Min Threshold";
 char* trackbar_name2 = "Max Threshold";
@@ -58,7 +61,7 @@ int makeItOdd(int value) {
 }
 
 void SobelXMaskChange() {
-	Sobel(detected_edges, grad_x, ddepth, 1, 0, makeItOdd(sobel_x_mask), scale, delta, BORDER_DEFAULT);
+	Sobel(gaussian_effect, grad_x, ddepth, 1, 0, makeItOdd(sobel_x_mask), scale, delta, BORDER_DEFAULT);
 	convertScaleAbs(grad_x, abs_grad_x);
 }
 
@@ -67,7 +70,7 @@ void SobelXMask(int, void*) {
 }
 
 void SobelYMaskChange() {
-	Sobel(detected_edges, grad_y, ddepth, 0, 1, makeItOdd(sobel_y_mask), scale, delta, BORDER_DEFAULT);
+	Sobel(gaussian_effect, grad_y, ddepth, 0, 1, makeItOdd(sobel_y_mask), scale, delta, BORDER_DEFAULT);
 	convertScaleAbs(grad_y, abs_grad_y);
 }
 
@@ -77,7 +80,7 @@ void SobelYMask(int, void*) {
 
 void GaussianFilterChange() {
 	int tmpGaussian = makeItOdd(gaussian);
-	GaussianBlur(frame_gray, detected_edges, Size(tmpGaussian, tmpGaussian), 0, 0, BORDER_DEFAULT);
+	GaussianBlur(frame_gray, gaussian_effect, Size(tmpGaussian, tmpGaussian), 0, 0, BORDER_DEFAULT);
 }
 
 void GaussianFilter(int, void*) {
@@ -85,10 +88,7 @@ void GaussianFilter(int, void*) {
 }
 
 void CannyThresholdChange() {
-	cvtColor(frame, frame_gray, CV_RGB2GRAY);
-	GaussianFilterChange();
-	Canny(detected_edges, detected_edges, lowThreshold, highThreshold, kernel_size);
-	imshow(window_name2, detected_edges);
+	Canny(gaussian_effect, detected_edges, lowThreshold, highThreshold, kernel_size);
 }
 
 void CannyThreshold(int, void*) {
@@ -112,7 +112,7 @@ void gradients() {
 }
 
 void getOrientation() {
-	orientation = Mat::zeros(image.rows, image.cols, CV_32F);
+	orientation = Mat::zeros(frame.rows, frame.cols, CV_32F);
 	phase(grad_x, grad_y, orientation, true);
 }
 
@@ -138,6 +138,7 @@ int main() {
 	namedWindow(window_name4, CV_WINDOW_AUTOSIZE);
 	namedWindow(window_name5, CV_WINDOW_AUTOSIZE);
 	namedWindow(window_name6, CV_WINDOW_AUTOSIZE);
+	namedWindow(window_name7, CV_WINDOW_AUTOSIZE);
 
 	double dWidth = cap.set(CV_CAP_PROP_FRAME_WIDTH, 320);
 	double dHeight = cap.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
@@ -149,14 +150,17 @@ int main() {
 	createTrackbar(trackbar_name5, window_name, &sobel_y_mask, max_sobel_y_mask, SobelYMask);
 
 	cap >> frame;
-	image = Mat::zeros(frame.rows, frame.cols, CV_8UC3);
+	colorized_grad = Mat::zeros(frame.rows, frame.cols, CV_8UC3);
+	colorized_edges = Mat::zeros(frame.rows, frame.cols, CV_8UC3);
 
 	while (1) {
 		try {
 			cap >> frame;
 			dst.create(frame.size(), frame.type());
+
+			cvtColor(frame, frame_gray, CV_RGB2GRAY);
+			GaussianFilterChange();
 			CannyThresholdChange();
-			imshow(window_name, frame);
 
 			gradients();
 			getOrientation();
@@ -164,20 +168,28 @@ int main() {
 			for (int y = 0; y < orientation.rows; y++) {
 				for (int x = 0; x < orientation.cols; x++) {	
 					double orient = (double)orientation.at<float>(Point(x, y));
+
 					int point = grad.at<uchar>(Point(x, y));
-					bool pixel = !(point < lowThreshold) && (point > highThreshold);
-					colorize(image, pixel, orient, x, y);
+					bool pixel = !(point < lowThreshold) && (point >= highThreshold);
+					colorize(colorized_grad, pixel, orient, x, y);
+
+					int point2 = detected_edges.at<uchar>(Point(x, y));
+					bool pixel2 = !(point2 < lowThreshold) && (point2 >= highThreshold);
+					colorize(colorized_edges, pixel2, orient, x, y);
 				}
 			}
 
+			imshow(window_name, frame);
+			imshow(window_name2, detected_edges);
 			imshow(window_name3, res_gx);
 			imshow(window_name4, res_gy);
 			imshow(window_name5, grad);
-			imshow(window_name6, image);
-		}
-		catch (Exception e) {
+			imshow(window_name6, colorized_grad);
+			imshow(window_name7, colorized_edges);
+		} catch (Exception e) {
 			cap.open(1);
 		}
+
 		if (waitKey(15) == 27) {
 			cap.release();
 			destroyAllWindows();
