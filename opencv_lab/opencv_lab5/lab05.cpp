@@ -53,9 +53,12 @@ Vec3b color3 = Vec3b(0, 255, 0);
 Vec3b color4 = Vec3b(0, 0, 255);
 Vec3b color5 = Vec3b(0, 0, 0);
 
+int makeItOdd(int value) {
+	return value * 2 + 1;
+}
+
 void SobelXMaskChange() {
-	int new_sobel_x_mask = sobel_x_mask * 2 + 1;
-	Sobel(detected_edges, grad_x, ddepth, 1, 0, new_sobel_x_mask, scale, delta, BORDER_DEFAULT);
+	Sobel(detected_edges, grad_x, ddepth, 1, 0, makeItOdd(sobel_x_mask), scale, delta, BORDER_DEFAULT);
 	convertScaleAbs(grad_x, abs_grad_x);
 }
 
@@ -64,8 +67,7 @@ void SobelXMask(int, void*) {
 }
 
 void SobelYMaskChange() {
-	int new_sobel_y_mask = sobel_y_mask * 2 + 1;
-	Sobel(detected_edges, grad_y, ddepth, 0, 1, new_sobel_y_mask, scale, delta, BORDER_DEFAULT);
+	Sobel(detected_edges, grad_y, ddepth, 0, 1, makeItOdd(sobel_y_mask), scale, delta, BORDER_DEFAULT);
 	convertScaleAbs(grad_y, abs_grad_y);
 }
 
@@ -74,7 +76,7 @@ void SobelYMask(int, void*) {
 }
 
 void GaussianFilterChange() {
-	int tmpGaussian =  gaussian * 2 + 1;
+	int tmpGaussian = makeItOdd(gaussian);
 	GaussianBlur(frame_gray, detected_edges, Size(tmpGaussian, tmpGaussian), 0, 0, BORDER_DEFAULT);
 }
 
@@ -118,12 +120,12 @@ void setColor(Mat picture, int x, int y, Vec3b color) {
 	picture.at<Vec3b>(Point(x, y)) = color;
 }
 
-void colorize(bool pixel, double orient, int x, int y) {
-	if (pixel && isInRange(orient, 45, 135)) setColor(image, x, y, color1);
-	else if (pixel && isInRange(orient, 135, 225)) setColor(image, x, y, color2);
-	else if (pixel && isInRange(orient, 225, 315)) setColor(image, x, y, color3);
-	else if (pixel && isInRange(orient, 315, 360)) setColor(image, x, y, color4);
-	else setColor(image, x, y, color5);
+void colorize(Mat picture, bool pixel, double orient, int x, int y) {
+	if (pixel && isInRange(orient, 45, 135)) setColor(picture, x, y, color1);
+	else if (pixel && isInRange(orient, 135, 225)) setColor(picture, x, y, color2);
+	else if (pixel && isInRange(orient, 225, 315)) setColor(picture, x, y, color3);
+	else if (pixel && isInRange(orient, 315, 360)) setColor(picture, x, y, color4);
+	else setColor(picture, x, y, color5);
 }
 
 int main() {
@@ -162,8 +164,9 @@ int main() {
 			for (int y = 0; y < orientation.rows; y++) {
 				for (int x = 0; x < orientation.cols; x++) {	
 					double orient = (double)orientation.at<float>(Point(x, y));
-					bool pixel = (grad.at<uchar>(Point(x, y)) != 0);
-					colorize(pixel, orient, x, y);
+					int point = grad.at<uchar>(Point(x, y));
+					bool pixel = !(point < lowThreshold) && (point > highThreshold);
+					colorize(image, pixel, orient, x, y);
 				}
 			}
 
@@ -178,7 +181,6 @@ int main() {
 		if (waitKey(15) == 27) {
 			cap.release();
 			destroyAllWindows();
-			CannyThreshold(0, 0);
 			return 0;
 		}
 	}
