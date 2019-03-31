@@ -8,32 +8,122 @@ using namespace std;
 
 Mat frame, frame_gray;
 Mat dst, detected_edges;
+Mat grad, grad_x, grad_y;
+Mat abs_grad_x, abs_grad_y;
+Mat res_gx, res_gy;
+Mat orientation, image;
+
 int lowThreshold = 50;
-const int max_lowThreshold = 100;
+const int max_lowThreshold = 255;
+
 int highThreshold = 90;
 const int max_highThreshold = 255;
-//const int ratio = 3;
+
+int gaussian = 1;
+const int max_gaussian = 15;
+
+int sobel_x_mask = 1;
+const int max_sobel_x_mask = 10;
+
+int sobel_y_mask = 1;
+const int max_sobel_y_mask = 10;
+
 const int kernel_size = 3;
 
-const char* window_name = "Original";
-const char* window_name2 = "Colorized";
-const char* window_name3 = "Grad";
-const char* window_name4 = "Grad_X";
-const char* window_name5 = "Grad_Y";
+int scale = 1;
+int delta = 0;
+int ddepth = CV_32F;
 
-Mat grad_x, grad_y;
-Mat abs_grad_x, abs_grad_y;
+const char* window_name = "TrackBars";
+const char* window_name2 = "Canny";
+const char* window_name3 = "Grad_X";
+const char* window_name4 = "Grad_Y";
+const char* window_name5 = "Grad";
+const char* window_name6 = "Colorized";
 
+char* trackbar_name = "Min Threshold";
+char* trackbar_name2 = "Max Threshold";
+char* trackbar_name3 = "Gaussian";
+char* trackbar_name4 = "X-Mask";
+char* trackbar_name5 = "Y-Mask";
+
+Vec3b color1 = Vec3b(255, 255, 255);
+Vec3b color2 = Vec3b(255, 0, 0);
+Vec3b color3 = Vec3b(0, 255, 0);
+Vec3b color4 = Vec3b(0, 0, 255);
+Vec3b color5 = Vec3b(0, 0, 0);
+
+void SobelXMaskChange() {
+	int new_sobel_x_mask = sobel_x_mask * 2 + 1;
+	Sobel(detected_edges, grad_x, ddepth, 1, 0, new_sobel_x_mask, scale, delta, BORDER_DEFAULT);
+	convertScaleAbs(grad_x, abs_grad_x);
+}
+
+void SobelXMask(int, void*) {
+	SobelXMaskChange();
+}
+
+void SobelYMaskChange() {
+	int new_sobel_y_mask = sobel_y_mask * 2 + 1;
+	Sobel(detected_edges, grad_y, ddepth, 0, 1, new_sobel_y_mask, scale, delta, BORDER_DEFAULT);
+	convertScaleAbs(grad_y, abs_grad_y);
+}
+
+void SobelYMask(int, void*) {
+	SobelYMaskChange();
+}
+
+void GaussianFilterChange() {
+	int tmpGaussian =  gaussian * 2 + 1;
+	GaussianBlur(frame_gray, detected_edges, Size(tmpGaussian, tmpGaussian), 0, 0, BORDER_DEFAULT);
+}
+
+void GaussianFilter(int, void*) {
+	GaussianFilterChange();
+}
 
 void CannyThresholdChange() {
 	cvtColor(frame, frame_gray, CV_RGB2GRAY);
-	GaussianBlur(frame_gray, detected_edges, Size(3, 3), 0, 0, BORDER_DEFAULT);
+	GaussianFilterChange();
 	Canny(detected_edges, detected_edges, lowThreshold, highThreshold, kernel_size);
 	imshow(window_name2, detected_edges);
 }
 
 void CannyThreshold(int, void*) {
 	CannyThresholdChange();
+}
+
+bool isInRange(double value, double min, double max) {
+	if (value > min && value <= max) return true;
+	else return false;
+}
+
+void gradients() {
+	GaussianFilterChange();
+
+	SobelXMaskChange();
+	SobelYMaskChange();
+
+	threshold(abs_grad_x, res_gx, lowThreshold, max_highThreshold, THRESH_BINARY);
+	threshold(abs_grad_y, res_gy, lowThreshold, max_highThreshold, THRESH_BINARY);
+	addWeighted(res_gx, 1.0, res_gy, 1.0, 0, grad);
+}
+
+void getOrientation() {
+	orientation = Mat::zeros(image.rows, image.cols, CV_32F);
+	phase(grad_x, grad_y, orientation, true);
+}
+
+void setColor(Mat picture, int x, int y, Vec3b color) {
+	picture.at<Vec3b>(Point(x, y)) = color;
+}
+
+void colorize(bool pixel, double orient, int x, int y) {
+	if (pixel && isInRange(orient, 45, 135)) setColor(image, x, y, color1);
+	else if (pixel && isInRange(orient, 135, 225)) setColor(image, x, y, color2);
+	else if (pixel && isInRange(orient, 225, 315)) setColor(image, x, y, color3);
+	else if (pixel && isInRange(orient, 315, 360)) setColor(image, x, y, color4);
+	else setColor(image, x, y, color5);
 }
 
 int main() {
@@ -45,64 +135,42 @@ int main() {
 	namedWindow(window_name3, CV_WINDOW_AUTOSIZE);
 	namedWindow(window_name4, CV_WINDOW_AUTOSIZE);
 	namedWindow(window_name5, CV_WINDOW_AUTOSIZE);
+	namedWindow(window_name6, CV_WINDOW_AUTOSIZE);
 
-	double dWidth = cap.set(CV_CAP_PROP_FRAME_WIDTH, 640);
-	double dHeight = cap.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
+	double dWidth = cap.set(CV_CAP_PROP_FRAME_WIDTH, 320);
+	double dHeight = cap.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
 
-	createTrackbar("Min Threshold:", window_name2, &lowThreshold, max_lowThreshold, CannyThreshold);
-	createTrackbar("Max Threshold:", window_name2, &highThreshold, max_highThreshold, CannyThreshold);
-
-	Mat grad;
-	int scale = 1;
-	int delta = 0;
-	int ddepth = CV_32F;
+	createTrackbar(trackbar_name, window_name, &lowThreshold, max_lowThreshold, CannyThreshold);
+	createTrackbar(trackbar_name2, window_name, &highThreshold, max_highThreshold, CannyThreshold);
+	createTrackbar(trackbar_name3, window_name, &gaussian, max_gaussian, GaussianFilter);
+	createTrackbar(trackbar_name4, window_name, &sobel_x_mask, max_sobel_x_mask, SobelXMask);
+	createTrackbar(trackbar_name5, window_name, &sobel_y_mask, max_sobel_y_mask, SobelYMask);
 
 	cap >> frame;
-	Mat image = Mat::zeros(frame.rows, frame.cols, CV_8UC3);
+	image = Mat::zeros(frame.rows, frame.cols, CV_8UC3);
 
 	while (1) {
 		try {
 			cap >> frame;
 			dst.create(frame.size(), frame.type());
-			imshow(window_name, frame);		
 			CannyThresholdChange();
+			imshow(window_name, frame);
 
-			GaussianBlur(frame_gray, frame_gray, Size(7, 7), 0, 0, BORDER_DEFAULT);
-
-			Sobel(frame_gray, grad_x, ddepth, 1, 0, 3, scale, delta, BORDER_DEFAULT);
-			Sobel(frame_gray, grad_y, ddepth, 0, 1, 3, scale, delta, BORDER_DEFAULT);
-
-			convertScaleAbs(grad_x, abs_grad_x);
-			convertScaleAbs(grad_y, abs_grad_y);
-
-			Mat orientation = Mat::zeros(image.rows, image.cols, CV_32F);
-			phase(grad_x, grad_y, orientation, true);
-
-			Mat res_gx, res_gy;
-			threshold(abs_grad_x, res_gx, lowThreshold, 255, THRESH_BINARY);
-			threshold(abs_grad_y, res_gy, lowThreshold, 255, THRESH_BINARY);
-
-			Vec3b col1 = Vec3b(255, 255, 255);
-			Vec3b col2 = Vec3b(255, 0, 0);
-			Vec3b col3 = Vec3b(0, 255, 0);
-			Vec3b col4 = Vec3b(0, 0, 255);
-			Vec3b col5 = Vec3b(0, 0, 0);
+			gradients();
+			getOrientation();
 
 			for (int y = 0; y < orientation.rows; y++) {
 				for (int x = 0; x < orientation.cols; x++) {	
 					double orient = (double)orientation.at<float>(Point(x, y));
-
-					if (orient > 45 && orient <= 135) image.at<Vec3b>(Point(x, y)) = col1;
-					else if (orient > 135 && orient <= 225) image.at<Vec3b>(Point(x, y)) = col2;
-					else if (orient > 225 && orient <= 315) image.at<Vec3b>(Point(x, y)) = col3;
-					else if (orient > 315 && orient <= 360) image.at<Vec3b>(Point(x, y)) = col4;
-					else image.at<Vec3b>(Point(x, y)) = col5;
+					bool pixel = (grad.at<uchar>(Point(x, y)) != 0);
+					colorize(pixel, orient, x, y);
 				}
 			}
 
-			imshow(window_name3, image);
-			imshow(window_name4, res_gx);
-			imshow(window_name5, res_gy);
+			imshow(window_name3, res_gx);
+			imshow(window_name4, res_gy);
+			imshow(window_name5, grad);
+			imshow(window_name6, image);
 		}
 		catch (Exception e) {
 			cap.open(1);
