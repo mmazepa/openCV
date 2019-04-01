@@ -61,7 +61,7 @@ int makeItOdd(int value) {
 }
 
 void SobelXMaskChange() {
-	Sobel(gaussian_effect, grad_x, ddepth, 1, 0, makeItOdd(sobel_x_mask), scale, delta, BORDER_DEFAULT);
+	Sobel(gaussian_effect, grad_x, ddepth, 0, 1, makeItOdd(sobel_x_mask), scale, delta, BORDER_DEFAULT);
 	convertScaleAbs(grad_x, abs_grad_x);
 }
 
@@ -70,7 +70,7 @@ void SobelXMask(int, void*) {
 }
 
 void SobelYMaskChange() {
-	Sobel(gaussian_effect, grad_y, ddepth, 0, 1, makeItOdd(sobel_y_mask), scale, delta, BORDER_DEFAULT);
+	Sobel(gaussian_effect, grad_y, ddepth, 1, 0, makeItOdd(sobel_y_mask), scale, delta, BORDER_DEFAULT);
 	convertScaleAbs(grad_y, abs_grad_y);
 }
 
