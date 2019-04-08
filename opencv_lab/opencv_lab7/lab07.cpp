@@ -12,13 +12,7 @@ Mat frame_with_contours;
 vector<vector<Point>> contours;
 vector<Vec4i> hierarchy;
 
-//pomaranczowy / ¿ó³ty
-//	hmin 0  hmax 41  smin 116 smax 226 vmin 171 vmax 219
-//zielony
-//	hmin 34 hmax 82  smin 65  smax 253 vmin 75  vmax 154
-//niebieski
-//	hmin 89 hmax 147 smin 144 smax 318 vmin  45 vmax 195
-
+// aktualnie ustawiony: zielony
 int hsv_h_min = 34;
 int hsv_h_max = 82;
 int hsv_s_min = 65;
@@ -27,21 +21,38 @@ int hsv_v_min = 75;
 int hsv_v_max = 154;
 const int hsv_max_value = 360;
 
-void drawAim() {
-	Moments m = moments(frame_threshold, true);
-	Point center = Point(m.m10 / m.m00, m.m01 / m.m00);
+Point calculateCenter(Moments mu, const vector<Point>& object) {
+	Point center = cv::Point(mu.m10 / mu.m00, mu.m01 / mu.m00);
+	return center;
+}
 
+void drawCircle(Point center) {
+	circle(frame_with_contours, center, 30, (0, 255, 0), 3);
+}
+
+void drawPlus(Moments m) {
 	Point center_p1 = Point(m.m10 / m.m00 - 15, m.m01 / m.m00);
 	Point center_p2 = Point(m.m10 / m.m00 + 15, m.m01 / m.m00);
 	Point center_p3 = Point(m.m10 / m.m00, m.m01 / m.m00 - 15);
 	Point center_p4 = Point(m.m10 / m.m00, m.m01 / m.m00 + 15);
-
-	circle(frame_with_contours, center, 30, (0, 255, 0), 3);
 	line(frame_with_contours, center_p1, center_p2, (0, 255, 0), 3);
 	line(frame_with_contours, center_p3, center_p4, (0, 255, 0), 3);
+}
 
+void drawPosition(Moments m, Point center) {
 	Point center_p5 = Point(m.m10 / m.m00, m.m01 / m.m00 - 30);
 	putText(frame_with_contours, format("(%d,%d)", center.x, center.y), center_p5, FONT_HERSHEY_DUPLEX, 1.0, (0, 255, 0));
+}
+
+void drawAim(vector<vector<Point>> contours, int i) {
+	Moments m = moments(contours[i], true);
+	Point center = calculateCenter(m, contours[i]);
+
+	//TrackingObject to;
+
+	drawCircle(center);
+	drawPlus(m);
+	drawPosition(m, center);
 }
 
 void HSV_ValueChanger() {
@@ -50,24 +61,15 @@ void HSV_ValueChanger() {
 	dilate(frame_threshold, frame_threshold, Mat(), Point(-1, -1), 2);
 
 	findContours(frame_threshold, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
-
-	int largest_area = 0;
-	int largest_contour_index = 0;
-	Rect bounding_rect;
+	frame_with_contours = frame.clone();
 
 	for (int i = 0; i < contours.size(); i++) {
 		double a = contourArea(contours[i], false);
-		if (a > largest_area) {
-			largest_area = a;
-			largest_contour_index = i;
-			bounding_rect = boundingRect(contours[i]);
+		if (a > 150) {
+			//drawContours(frame_with_contours, contours, i, (0, 255, 0), 3, 8, hierarchy);
+			drawAim(contours, i);
 		}
 	}
-
-	//drawContours(frame, contours, largest_contour_index, (0, 255, 0), CV_FILLED, 8, hierarchy);
-	frame_with_contours = frame.clone();
-
-	drawAim();
 }
 
 void HSV_ValueChange(int, void*) {
@@ -104,8 +106,7 @@ int main() {
 			imshow("hsv", frame_hsv);
 			imshow("threshold", frame_threshold);
 			imshow("contours", frame_with_contours);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			cap.open(1);
 		}
 
