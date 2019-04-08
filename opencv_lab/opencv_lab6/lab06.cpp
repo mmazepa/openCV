@@ -2,6 +2,7 @@
 #include<opencv2/imgproc/imgproc.hpp>
 #include<iostream>
 #include<conio.h>
+#include<ctime>
 
 using namespace cv;
 using namespace std;
@@ -44,7 +45,30 @@ void drawAim() {
 	putText(frame_with_contours, format("(%d,%d)", center.x, center.y), center_p5, FONT_HERSHEY_DUPLEX, 1.0, (0, 255, 0));
 }
 
+void changeValues(int hsv_h_min2, int hsv_h_max2, int hsv_s_min2, int hsv_s_max2, int hsv_v_min2, int hsv_v_max2) {
+	hsv_h_min = hsv_h_min2;
+	hsv_h_max = hsv_h_max2;
+	hsv_s_min = hsv_s_min2;
+	hsv_s_max = hsv_s_max2;
+	hsv_v_min = hsv_v_min2;
+	hsv_v_max = hsv_v_max2;
+}
+
 void HSV_ValueChanger() {
+	//pomaranczowy / ¿ó³ty
+	//	hmin 0  hmax 41  smin 116 smax 226 vmin 171 vmax 219
+	//zielony
+	//	hmin 34 hmax 82  smin 65  smax 253 vmin 75  vmax 154
+	//niebieski
+	//	hmin 89 hmax 147 smin 144 smax 318 vmin  45 vmax 195
+
+	time_t current_time;
+	current_time = time(NULL);
+
+	if (current_time%15 < 5) changeValues(78, 208, 137, 241, 119, 203);
+	else if (current_time%15 < 10) changeValues(34, 82, 65, 253, 75, 154);
+	else if (current_time % 15 < 15) changeValues(25, 236, 141, 292, 112, 140);
+
 	inRange(frame_hsv, Scalar(hsv_h_min, hsv_s_min, hsv_v_min), Scalar(hsv_h_max, hsv_s_max, hsv_v_max), frame_threshold);
 	erode(frame_threshold, frame_threshold, Mat(), Point(-1, -1), 2);
 	dilate(frame_threshold, frame_threshold, Mat(), Point(-1, -1), 2);

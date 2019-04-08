@@ -38,7 +38,7 @@ cyfrowych i sekwencji wideo w OpenCV w roku akademickim 2018/2019.
 	<tr>
 		<td>Lab 6</td>
 		<td>01.04.2019</td>
-		<td>oddane na zajęciach (+)</td>
+		<td>oddane na zajęciach (+), 80%</td>
 	</tr>
 	<tr>
 		<td>Lab 7</td>
