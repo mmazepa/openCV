@@ -45,4 +45,19 @@ cyfrowych i sekwencji wideo w OpenCV w roku akademickim 2018/2019.
 		<td>08.04.2019</td>
 		<td>-</td>
 	</tr>
+	<tr>
+		<td>Lab 8</td>
+		<td>15.04.2019</td>
+		<td>-</td>
+	</tr>
+	<tr>
+		<td>Lab 9</td>
+		<td>29.04.2019</td>
+		<td>-</td>
+	</tr>
+	<tr>
+		<td>Lab 10</td>
+		<td>06.05.2019</td>
+		<td>-</td>
+	</tr>
 </table>
