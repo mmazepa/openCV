@@ -18,12 +18,12 @@
     <ClCompile Include="lab07.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="TrackingObject.cpp">
+    <ClCompile Include="TrackedObject.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="TrackingObject.h">
+    <ClInclude Include="TrackedObject.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>

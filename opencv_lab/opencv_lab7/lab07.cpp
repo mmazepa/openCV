@@ -2,6 +2,7 @@
 #include<opencv2/imgproc/imgproc.hpp>
 #include<iostream>
 #include<conio.h>
+#include "TrackedObject.h"
 
 using namespace cv;
 using namespace std;
@@ -12,47 +13,68 @@ Mat frame_with_contours;
 vector<vector<Point>> contours;
 vector<Vec4i> hierarchy;
 
+Scalar color = (0, 255, 0);
+
+vector<TrackedObject> trackedVector;
+
 // aktualnie ustawiony: zielony
-int hsv_h_min = 34;
-int hsv_h_max = 82;
-int hsv_s_min = 65;
-int hsv_s_max = 253;
-int hsv_v_min = 75;
-int hsv_v_max = 154;
+// int hsv_h_min = 34;
+// int hsv_h_max = 82;
+// int hsv_s_min = 65;
+// int hsv_s_max = 253;
+// int hsv_v_min = 75;
+// int hsv_v_max = 154;
+
+// u mnie to jest zielony...
+int hsv_h_min = 5;
+int hsv_h_max = 75;
+int hsv_s_min = 132;
+int hsv_s_max = 267;
+int hsv_v_min = 101;
+int hsv_v_max = 183;
+
 const int hsv_max_value = 360;
 
-Point calculateCenter(Moments mu, const vector<Point>& object) {
-	Point center = cv::Point(mu.m10 / mu.m00, mu.m01 / mu.m00);
-	return center;
+Point calculateCenter(Moments m) {
+	return Point(m.m10 / m.m00, m.m01 / m.m00);
 }
 
-void drawCircle(Point center) {
-	circle(frame_with_contours, center, 30, (0, 255, 0), 3);
+Point addToPoint(Point p, int x, int y) {
+	return Point(p.x + x, p.y + y);
 }
 
-void drawPlus(Moments m) {
-	Point center_p1 = Point(m.m10 / m.m00 - 15, m.m01 / m.m00);
-	Point center_p2 = Point(m.m10 / m.m00 + 15, m.m01 / m.m00);
-	Point center_p3 = Point(m.m10 / m.m00, m.m01 / m.m00 - 15);
-	Point center_p4 = Point(m.m10 / m.m00, m.m01 / m.m00 + 15);
-	line(frame_with_contours, center_p1, center_p2, (0, 255, 0), 3);
-	line(frame_with_contours, center_p3, center_p4, (0, 255, 0), 3);
+void drawCircle(TrackedObject tracked) {
+	circle(frame_with_contours, tracked.getPoint(), 30, (0, 255, 0), 3);
 }
 
-void drawPosition(Moments m, Point center) {
-	Point center_p5 = Point(m.m10 / m.m00, m.m01 / m.m00 - 30);
-	putText(frame_with_contours, format("(%d,%d)", center.x, center.y), center_p5, FONT_HERSHEY_DUPLEX, 1.0, (0, 255, 0));
+void drawPlus(TrackedObject tracked) {
+	Point center = tracked.getPoint();
+
+	Point center_p1 = addToPoint(center, -15, 0);
+	Point center_p2 = addToPoint(center, 15, 0);
+	Point center_p3 = addToPoint(center, 0, -15);
+	Point center_p4 = addToPoint(center, 0, 15);
+
+	line(frame_with_contours, center_p1, center_p2, color, 3);
+	line(frame_with_contours, center_p3, center_p4, color, 3);
 }
 
-void drawAim(vector<vector<Point>> contours, int i) {
+void drawPosition(TrackedObject tracked) {
+	Point center = tracked.getPoint();
+	Point center_p = addToPoint(tracked.getPoint(), -75, -35);
+	putText(frame_with_contours, format("(%d,%d)", center.x, center.y), center_p, FONT_HERSHEY_DUPLEX, 1.0, color);
+}
+
+void drawAim(TrackedObject trackedObject) {
+	drawCircle(trackedObject);
+	drawPlus(trackedObject);
+	drawPosition(trackedObject);
+}
+
+void createTrackedObject(vector<vector<Point>> contours, int i) {
 	Moments m = moments(contours[i], true);
-	Point center = calculateCenter(m, contours[i]);
-
-	//TrackingObject to;
-
-	drawCircle(center);
-	drawPlus(m);
-	drawPosition(m, center);
+	Point center = calculateCenter(m);
+	trackedVector.push_back(TrackedObject(center, m));
 }
 
 void HSV_ValueChanger() {
@@ -63,12 +85,14 @@ void HSV_ValueChanger() {
 	findContours(frame_threshold, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
 	frame_with_contours = frame.clone();
 
+	trackedVector.clear();
 	for (int i = 0; i < contours.size(); i++) {
 		double a = contourArea(contours[i], false);
-		if (a > 150) {
-			//drawContours(frame_with_contours, contours, i, (0, 255, 0), 3, 8, hierarchy);
-			drawAim(contours, i);
-		}
+		if (a > 150) createTrackedObject(contours, i);
+	}
+
+	for (int i = 0; i < trackedVector.size(); i++) {
+		drawAim(trackedVector.at(i));
 	}
 }
 
@@ -83,7 +107,7 @@ int main() {
 	namedWindow("window", CV_WINDOW_AUTOSIZE);
 	namedWindow("hsv", CV_WINDOW_AUTOSIZE);
 	namedWindow("threshold", CV_WINDOW_AUTOSIZE);
-	namedWindow("frame_with_contours", CV_WINDOW_AUTOSIZE);
+	namedWindow("contours", CV_WINDOW_AUTOSIZE);
 
 	double dWidth = cap.set(CV_CAP_PROP_FRAME_WIDTH, 640);
 	double dHeight = cap.set(CV_CAP_PROP_FRAME_HEIGHT, 480);

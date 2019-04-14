@@ -118,10 +118,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="lab07.cpp" />
-    <ClCompile Include="TrackingObject.cpp" />
+    <ClCompile Include="TrackedObject.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="TrackingObject.h" />
+    <ClInclude Include="TrackedObject.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
