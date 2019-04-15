@@ -18,20 +18,20 @@ Scalar color = (0, 255, 0);
 vector<TrackedObject> trackedVector;
 
 // aktualnie ustawiony: zielony
-// int hsv_h_min = 34;
-// int hsv_h_max = 82;
-// int hsv_s_min = 65;
-// int hsv_s_max = 253;
-// int hsv_v_min = 75;
-// int hsv_v_max = 154;
+int hsv_h_min = 34;
+int hsv_h_max = 82;
+int hsv_s_min = 65;
+int hsv_s_max = 253;
+int hsv_v_min = 75;
+int hsv_v_max = 154;
 
 // u mnie to jest zielony...
-int hsv_h_min = 5;
-int hsv_h_max = 75;
-int hsv_s_min = 132;
-int hsv_s_max = 267;
-int hsv_v_min = 101;
-int hsv_v_max = 183;
+// int hsv_h_min = 5;
+// int hsv_h_max = 75;
+// int hsv_s_min = 132;
+// int hsv_s_max = 267;
+// int hsv_v_min = 101;
+// int hsv_v_max = 183;
 
 const int hsv_max_value = 360;
 

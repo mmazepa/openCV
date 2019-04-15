@@ -2,6 +2,7 @@
 using namespace cv;
 
 class TrackedObject {
+private:
 	Point point;
 	Moments m;
 public:
