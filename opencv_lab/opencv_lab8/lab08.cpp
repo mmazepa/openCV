@@ -107,7 +107,7 @@ int do_houghLinesP(string capType) {
 
 			ValueChanger();
 
-			Canny(frame, canny_frame, 50, 255, 3);
+			Canny(frame, canny_frame, 100, 255, 3);
 			HoughLinesP(canny_frame, lines, 1, CV_PI / 180, 50, 50, 10);
 
 			for (int i = 0; i < lines.size(); i++) {
