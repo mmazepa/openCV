@@ -48,7 +48,7 @@ cyfrowych i sekwencji wideo w OpenCV w roku akademickim 2018/2019.
 	<tr>
 		<td>Lab 8</td>
 		<td>15.04.2019</td>
-		<td>-</td>
+		<td>75%</td>
 	</tr>
 	<tr>
 		<td>Lab 9</td>
