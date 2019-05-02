@@ -18,7 +18,7 @@ VideoCapture cap;
 
 // int...
 int maxCorners = 150;
-int maxCorners_max = 250;
+int maxCorners_max = 500;
 
 // double...
 int qualityLevel = 2;
@@ -57,6 +57,7 @@ void putTrackbarRealValuesOnFrame(double newQuality, double newDistance) {
 	textWithShadow("Max Corners", maxCorners, Point(5, 15), Scalar(150, 0, 0));
 	textWithShadow("Quality Level", newQuality, Point(5, 30), Scalar(0, 100, 0));
 	textWithShadow("Min Distance", newDistance, Point(5, 45), Scalar(0, 0, 150));
+	textWithShadow("Points", corners_next.size(), Point(5, 60), Scalar(50, 50, 50));
 }
 
 void displayCircles(vector<Point2f> corners, Scalar color) {
@@ -71,14 +72,33 @@ void displayCircles(vector<Point2f> corners1, vector<Point2f> corners2, Scalar c
 }
 
 bool pointInsideImage(Point2f point) {
-	if (point.x < 0 && point.x > 640) return false;
-	if (point.y < 0 && point.y > 480) return false;
+	if (point.x < 0 || point.x > 640) return false;
+	if (point.y < 0 || point.y > 480) return false;
 	return true;
+}
+
+bool isPointMoving(Point2f point1, Point2f point2) {
+	//if (point1.x == point2.x && point1.y == point2.y) return false;
+	//if (point1.x == point2.x+10 && point1.y == point2.y+10) return false;
+	if (abs(point1.x-point2.x) < 10 && abs(point1.y-point2.y) < 10) return false;
+	return true;
+}
+
+Mat opening(Mat frame) {
+	erode(frame, frame, Mat(), Point(-1, -1), 2);
+	dilate(frame, frame, Mat(), Point(-1, -1), 1);
+	//blur(frame, frame, Size(3, 3), Point(-1, -1), 2);
+	return frame;
 }
 
 void ValueChanger() {
 	Mat tmp = frame_next.clone();
 	cvtColor(tmp, tmp, CV_RGB2GRAY);
+	threshold(tmp, tmp, 100, 255, CV_THRESH_BINARY);
+	
+	tmp = opening(tmp);
+
+	imshow("window", tmp);
 
 	double newQuality = guardRange(prepareDoubleValue(qualityLevel, qualityLevel_max));
 	double newDistance = prepareDoubleValue(minDistance, minDistance_max);
@@ -86,35 +106,37 @@ void ValueChanger() {
 	goodFeaturesToTrack(tmp, corners_next, maxCorners, newQuality, newDistance, Mat(), 3, 0, false, 0.04);
 	//cornerSubPix(tmp, corners_next, Size(15, 15), Size(-1, -1), TermCriteria());
 
-	//displayCircles(corners_prev, Scalar(0, 0, 200));
-
-	//tmp_corners_next = corners_next;
-	//tmp_corners_prev = corners_prev;
-
 	if (!corners_prev.empty() && !frame_prev.empty())
 		calcOpticalFlowPyrLK(frame_prev, frame_next, corners_prev, corners_next, status, err);
 
 	displayCircles(corners_next, Scalar(0, 150, 0));
 
-	//displayCircles(corners_prev, corners_next, Scalar(0, 0, 200), Scalar(0, 150, 0));
-
 	//cout << status.size() << endl;
-	for (int i = 0; i < status.size(); i++) {
-		if (!pointInsideImage(corners_prev[i]) || !pointInsideImage(corners_next[i])) {
-			//corners_prev.erase(corners_prev.begin() + i);
-			//corners_next.erase(corners_next.begin() + i);
-			//goodFeaturesToTrack(tmp, corners_next, maxCorners, newQuality, newDistance, Mat(), 3, 0, false, 0.04);
-		}
+	for (int i = status.size() - 1; i >= 0; i--) {
+		//if (i == 0) break;
 
 		if (status[i] == 1 && !err[i] == 0)
 			line(corner_frame, corners_prev[i], corners_next[i], Scalar(0, 255, 0), 1);
+
+		if (!pointInsideImage(corners_next[i])) {// || !isPointMoving(corners_prev[i], corners_next[i])) {
+			cout << "Punkt " << i << " uciek³!" << endl;
+			corners_next.erase(corners_next.begin() + i);
+			//if (i > 0) i--;
+		}
+	}
+
+	// (+/-)...
+	if (corners_next.size() < maxCorners / 4) {
+		while (corners_next.size() < maxCorners / 2) {
+			corners_next.insert(corners_next.begin(), Point(rand() % 640, rand() % 480));
+		}
 	}
 	
 	frame_prev = frame_next.clone();
 
-	if (counter % 5 == 0) corners_prev.clear();
+	//if (counter % 5 == 0) corners_prev.clear();
 	corners_prev = corners_next;
-	if (counter % 5 == 0) corners_next.clear();
+	//if (counter % 5 == 0) corners_next.clear();
 	counter++;
 
 	putTrackbarRealValuesOnFrame(newQuality, newDistance);
@@ -149,7 +171,7 @@ int main() {
 
 			ValueChanger();
 
-			imshow("window", frame_next);
+			//imshow("window", frame_next);
 			imshow("motion", corner_frame);
 		} catch (Exception e) {
 			cap.open(1);
