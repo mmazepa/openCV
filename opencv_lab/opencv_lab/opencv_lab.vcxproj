@@ -23,6 +23,7 @@
     <ProjectGuid>{22647620-7729-4AD9-9AF2-B79BE52D5604}</ProjectGuid>
     <RootNamespace>opencv_lab</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <ProjectName>opencv_lab01</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
