@@ -179,6 +179,7 @@ int main() {
 
 	switch (choice) {
 		case 1:
+			maxCorners = 10;
 			cap.open("C:/Users/Mariusz/Desktop/opencv_tmp/lab4/bike.avi");
 			threshold_value = 20;
 			erode_value = 1;
@@ -224,6 +225,7 @@ int main() {
 			corner_frame = frame_next.clone();
 
 			ValueChanger();
+			cout << maxCorners << ", " << qualityLevel << ", " << minDistance << endl;
 
 			imshow("window", frame_next);
 			imshow("motion", corner_frame);
