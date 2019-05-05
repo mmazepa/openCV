@@ -22,8 +22,8 @@ Mat corner_frame;
 VideoCapture cap;
 
 // int...
-int maxCorners = 150;
-int maxCorners_max = 500;
+int maxCorners = 50;
+int maxCorners_max = 100;
 
 // double...
 int qualityLevel = 1;
@@ -35,6 +35,10 @@ int minDistance_max = 250;
 
 int counter = 0;
 int timeDelay = 15;
+
+int threshold_value = 0;
+int erode_value = 0;
+int dilate_value = 0;
 
 double prepareDoubleValue(int min, int max, int ratio) {
 	double val = (double) min / max;
@@ -68,10 +72,8 @@ void putTrackbarRealValuesOnFrame(double newQuality, double newDistance) {
 }
 
 void displayCircles(vector<Point2f> corners, Scalar color) {
-	for (int i = 0; i < corners.size(); i++) {
+	for (int i = 0; i < corners.size(); i++)
 		circle(corner_frame, corners[i], 4, color, 2);
-		circle(corner_frame, corners[i], 1, color, 1);
-	}
 }
 
 bool pointInsideImage(Point2f point) {
@@ -80,9 +82,19 @@ bool pointInsideImage(Point2f point) {
 	return true;
 }
 
+Mat motionDetection(VideoCapture cap, Mat currentFrame, Mat frameToCompare, int threshold_value, int erode_value, int dilate_value) {
+	Mat diff;
+	absdiff(frameToCompare, currentFrame, diff);
+	cvtColor(diff, diff, CV_RGB2GRAY);
+	threshold(diff, diff, threshold_value, 255, THRESH_BINARY);
+	erode(diff, diff, Mat(), Point(-1, -1), erode_value);
+	dilate(diff, diff, Mat(), Point(-1, -1), dilate_value);
+	return diff;
+}
+
 void ValueChanger() {
-	Mat tmp = frame_next.clone();
-	cvtColor(tmp, tmp, CV_RGB2GRAY);
+	Mat tmp = frame_next.clone();	
+	tmp = motionDetection(cap, frame_next, frame_prev, threshold_value, erode_value, dilate_value);
 
 	double newQuality = guardRange(prepareDoubleValue(qualityLevel, qualityLevel_max, 1));
 	double newDistance = prepareDoubleValue(minDistance, minDistance_max, 5);
@@ -92,6 +104,7 @@ void ValueChanger() {
 		needToInit = false;
 	} else if (!corners_prev.empty()) {
 		calcOpticalFlowPyrLK(frame_prev, frame_next, corners_prev, corners_next, status, err, winSize, 3, termcrit, 0, 0.001);
+	
 		displayCircles(corners_next, Scalar(0, 150, 0));
 
 		for (int i = status.size() - 1; i >= 0; i--) {
@@ -99,22 +112,32 @@ void ValueChanger() {
 				line(corner_frame, corners_prev[i], corners_next[i], Scalar(0, 255, 0), 1);
 
 			if (!pointInsideImage(corners_next[i])) {
-				cout << "Punkt " << i << " uciek³!" << endl;
+				cout << "Point " << i << " deleted!" << endl;
 				corners_next.erase(corners_next.begin() + i);
-				if (corners_next.size() < 10) needToInit = true;
+				corners_prev.erase(corners_prev.begin() + i);
 			}
 		}
+
 		if (counter % timeDelay == 0)
 			goodFeaturesToTrack(tmp, corners_next, maxCorners, newQuality, newDistance, Mat(), 3, 0, false, 0.04);
 		counter++;
 	}
 
+	vector<Point> locations;
+	findNonZero(tmp, locations);
+
+	if (locations.size() > 0) {
+		while (corners_next.size() < maxCorners / 2) {
+			Point point = locations[rand() % locations.size()];
+			corners_next.push_back(point);
+			cout << point << " added!" << endl;
+		}
+	}
+
 	putTrackbarRealValuesOnFrame(newQuality, newDistance);
 
-	if (counter % timeDelay == 0) {
-		frame_prev = frame_next.clone();
-		corners_prev = corners_next;
-	}
+	frame_prev = frame_next.clone();
+	corners_prev = corners_next;
 
 	corners_next.clear();
 }
@@ -123,9 +146,61 @@ void ValueChange(int, void*) {
 	ValueChanger();
 }
 
+void cleanUpOnExit(VideoCapture cap) {
+	cap.release();
+	destroyAllWindows();
+}
+
+void pressAnyKey(String action) {
+	cout << action + ", press ANY key to continue..." << endl;
+	_getch();
+}
+
+int askForNumber(String question) {
+	int number;
+	cout << question << endl;
+	cin >> number;
+	return number;
+}
+
+void menu() {
+	cout << "MENU:" << endl;
+	cout << "   Optical Flow" << endl;
+	cout << "      1 - video (bike.avi)" << endl;
+	cout << "      2 - camera" << endl;
+	cout << "   Other options" << endl;
+	cout << "      3 - exit" << endl;
+	cout << endl;
+}
+
 int main() {
-	cap.open(0);
-	//cap.open("C:/Users/Mariusz/Desktop/opencv_tmp/lab4/bike.avi");
+	menu();
+	int choice = askForNumber("Your choice:");
+
+	switch (choice) {
+		case 1:
+			cap.open("C:/Users/Mariusz/Desktop/opencv_tmp/lab4/bike.avi");
+			threshold_value = 20;
+			erode_value = 1;
+			dilate_value = 1;
+			break;
+		case 2:
+			cap.open(0);
+			threshold_value = 30;
+			erode_value = 1;
+			dilate_value = 2;
+			break;
+		case 3:
+			cleanUpOnExit(cap);
+			pressAnyKey("Good-bye");
+			return 0;
+			break;
+		default:
+			cleanUpOnExit(cap);
+			pressAnyKey("Unknown choice");
+			return 0;
+			break;
+	}
 
 	namedWindow("window", CV_WINDOW_AUTOSIZE);
 	namedWindow("motion", CV_WINDOW_AUTOSIZE);
@@ -157,8 +232,7 @@ int main() {
 		}
 
 		if (waitKey(15) == 27) {
-			cap.release();
-			destroyAllWindows();
+			cleanUpOnExit(cap);
 			return 0;
 		}
 	}
