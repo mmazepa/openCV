@@ -107,14 +107,14 @@ void ValueChanger() {
 	
 		displayCircles(corners_next, Scalar(0, 150, 0));
 
-		for (int i = status.size() - 1; i >= 0; i--) {
+		for (int i = corners_next.size() - 1; i >= 0; i--) {
 			if (status[i] == 1 && !err[i] == 0)
 				line(corner_frame, corners_prev[i], corners_next[i], Scalar(0, 255, 0), 1);
 
 			if (!pointInsideImage(corners_next[i])) {
-				cout << "Point " << i << " deleted!" << endl;
 				corners_next.erase(corners_next.begin() + i);
 				corners_prev.erase(corners_prev.begin() + i);
+				cout << "Point " << i << " deleted!" << endl;
 			}
 		}
 
@@ -225,7 +225,6 @@ int main() {
 			corner_frame = frame_next.clone();
 
 			ValueChanger();
-			cout << maxCorners << ", " << qualityLevel << ", " << minDistance << endl;
 
 			imshow("window", frame_next);
 			imshow("motion", corner_frame);
