@@ -33,9 +33,6 @@ int qualityLevel_max = 100;
 int minDistance = 250;
 int minDistance_max = 250;
 
-int counter = 0;
-int timeDelay = 15;
-
 int threshold_value = 0;
 int erode_value = 0;
 int dilate_value = 0;
@@ -82,6 +79,10 @@ bool pointInsideImage(Point2f point) {
 	return true;
 }
 
+bool isPointMoving(Point2f p1, Point2f p2) {
+	return (abs(p1.x - p2.x) >= 2 || abs(p1.y - p2.y) >= 2);
+}
+
 Mat motionDetection(VideoCapture cap, Mat currentFrame, Mat frameToCompare, int threshold_value, int erode_value, int dilate_value) {
 	Mat diff;
 	absdiff(frameToCompare, currentFrame, diff);
@@ -93,7 +94,8 @@ Mat motionDetection(VideoCapture cap, Mat currentFrame, Mat frameToCompare, int 
 }
 
 void ValueChanger() {
-	Mat tmp = frame_next.clone();	
+	Mat tmp = frame_next.clone();
+	cvtColor(tmp, tmp, CV_RGB2GRAY);
 	tmp = motionDetection(cap, frame_next, frame_prev, threshold_value, erode_value, dilate_value);
 
 	double newQuality = guardRange(prepareDoubleValue(qualityLevel, qualityLevel_max, 1));
@@ -109,30 +111,18 @@ void ValueChanger() {
 
 		for (int i = corners_next.size() - 1; i >= 0; i--) {
 			if (status[i] == 1 && !err[i] == 0)
-				line(corner_frame, corners_prev[i], corners_next[i], Scalar(0, 255, 0), 1);
+				line(corner_frame, corners_prev[i], corners_next[i], Scalar(0, 255, 0), 2);
 
-			if (!pointInsideImage(corners_next[i])) {
+			if (!pointInsideImage(corners_next[i]) || !isPointMoving(corners_next[i], corners_prev[i])) {
 				corners_next.erase(corners_next.begin() + i);
 				corners_prev.erase(corners_prev.begin() + i);
 				cout << "Point " << i << " deleted!" << endl;
 			}
 		}
-
-		if (counter % timeDelay == 0)
-			goodFeaturesToTrack(tmp, corners_next, maxCorners, newQuality, newDistance, Mat(), 3, 0, false, 0.04);
-		counter++;
 	}
 
-	vector<Point> locations;
-	findNonZero(tmp, locations);
-
-	if (locations.size() > 0) {
-		while (corners_next.size() < maxCorners / 2) {
-			Point point = locations[rand() % locations.size()];
-			corners_next.push_back(point);
-			cout << point << " added!" << endl;
-		}
-	}
+	if (corners_next.size() < 10)
+		goodFeaturesToTrack(tmp, corners_next, maxCorners, newQuality, newDistance, Mat(), 3, 0, false, 0.04);
 
 	putTrackbarRealValuesOnFrame(newQuality, newDistance);
 
