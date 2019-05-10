@@ -89,7 +89,7 @@ void ValueChanger() {
 		}
 			
 		if (choice == 2)
-			GaussianBlur(frame(faces[i]), frame(faces[i]), Size(0, 0), 5);
+			GaussianBlur(frame(faces[i]), frame(faces[i]), Size(0, 0), 10);
 
 		Mat faceROI = gray(faces[i]);
 		vector<Rect> eyes;
@@ -109,6 +109,7 @@ void ValueChanger() {
 				Point eye_center1(faces[i].x + eyes[0].x + eyes[0].width / 2, faces[i].y + eyes[0].y + eyes[0].height / 2);
 				Point eye_center2(faces[i].x + eyes[1].x + eyes[1].width / 2, faces[i].y + eyes[1].y + eyes[1].height / 2);
 
+
 				Point bottomLeft(min(eye_center1.x, eye_center2.x)*0.8, min(eye_center1.y, eye_center2.y)*0.9);
 				Point topRight(max(eye_center1.x, eye_center2.x)*1.2, max(eye_center1.y, eye_center2.y)*1.1);
 
@@ -120,7 +121,7 @@ void ValueChanger() {
 		if (choice == 4) {
 			if (faces.size() > 1 && !firstFace.empty()) {
 				Mat face = frame(firstFace);
-				imshow("face", face);
+				//imshow("face", face);
 				if (i > 0 && !face.empty()) {
 					resize(face, face, Size(faces[i].width, faces[i].height), 0, 0, INTER_CUBIC);
 					face.copyTo(frame(faces[i]));
@@ -140,8 +141,8 @@ int main() {
 
 	namedWindow("window", CV_WINDOW_AUTOSIZE);
 
-	double dWidth = cap.set(CV_CAP_PROP_FRAME_WIDTH, 320);
-	double dHeight = cap.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
+	double dWidth = cap.set(CV_CAP_PROP_FRAME_WIDTH, 640);
+	double dHeight = cap.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
 
 	//createTrackbar("scaleFactor", "window", &scaleFactor, scaleFactor_max, ValueChange);
 	//createTrackbar("minNeighbors", "window", &minNeighbors, minNeighbors_max, ValueChange);
