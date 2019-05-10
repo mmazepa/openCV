@@ -62,13 +62,13 @@ void putTrackbarRealValuesOnFrame() {
 }
 
 int choiceChange() {
-	if (GetAsyncKeyState('1') & 0x8000)
+	if (GetAsyncKeyState('1'))
 		choice = 1;
-	else if (GetAsyncKeyState('2') & 0x8000)
+	else if (GetAsyncKeyState('2'))
 		choice = 2;
-	else if (GetAsyncKeyState('3') & 0x8000)
+	else if (GetAsyncKeyState('3'))
 		choice = 3;
-	else if (GetAsyncKeyState('4') & 0x8000)
+	else if (GetAsyncKeyState('4'))
 		choice = 4;
 	return choice;
 }
@@ -78,13 +78,16 @@ void ValueChanger() {
 	face_cascade.detectMultiScale(gray, faces);
 	//face_cascade.detectMultiScale(gray, faces, (double)scaleFactor, minNeighbors, 0, Size(minSize, minSize));
 
+	Rect firstFace;
+	if (faces.size() > 0) firstFace = faces[0];
+
 	for (int i = 0; i < faces.size(); i++) {
-		Point center(faces[i].x + faces[i].width / 2, faces[i].y + faces[i].height / 2);
-		int face_radius = cvRound((faces[i].width + faces[i].height)*0.25);
-
-		if (choice == 1)
+		if (choice == 1) {
+			Point center(faces[i].x + faces[i].width / 2, faces[i].y + faces[i].height / 2);
+			int face_radius = cvRound((faces[i].width + faces[i].height)*0.25);
 			circle(frame, center, face_radius, Scalar(0, 100, 0), 3);
-
+		}
+			
 		if (choice == 2)
 			GaussianBlur(frame(faces[i]), frame(faces[i]), Size(0, 0), 5);
 
@@ -102,7 +105,7 @@ void ValueChanger() {
 		}
 
 		if (choice == 3) {
-			if (eyes.size() == 2) {
+			if (eyes.size() >= 2) {
 				Point eye_center1(faces[i].x + eyes[0].x + eyes[0].width / 2, faces[i].y + eyes[0].y + eyes[0].height / 2);
 				Point eye_center2(faces[i].x + eyes[1].x + eyes[1].width / 2, faces[i].y + eyes[1].y + eyes[1].height / 2);
 
@@ -111,6 +114,17 @@ void ValueChanger() {
 
 				Rect censored_black = Rect(bottomLeft, topRight);
 				rectangle(frame, censored_black, Scalar(0, 0, 0), CV_FILLED);
+			}
+		}
+
+		if (choice == 4) {
+			if (faces.size() > 1 && !firstFace.empty()) {
+				Mat face = frame(firstFace);
+				imshow("face", face);
+				if (i > 0 && !face.empty()) {
+					resize(face, face, Size(faces[i].width, faces[i].height), 0, 0, INTER_CUBIC);
+					face.copyTo(frame(faces[i]));
+				}
 			}
 		}
 	}
@@ -122,6 +136,7 @@ void ValueChange(int, void*) {
 
 int main() {
 	cap.open(0);
+	//cap.open("C:/Users/Mariusz/Desktop/opencv_tmp/faces_sample.mp4");
 
 	namedWindow("window", CV_WINDOW_AUTOSIZE);
 
@@ -135,6 +150,10 @@ int main() {
 	while (1) {
 		try {
 			cap >> frame;
+			if (frame.empty()) {
+				cap.set(CAP_PROP_POS_FRAMES, 0);
+				cap >> frame;
+			}
 			cvtColor(frame, gray, CV_RGB2GRAY);
 			equalizeHist(gray, gray);
 
