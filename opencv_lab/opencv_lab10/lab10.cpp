@@ -18,16 +18,26 @@ CascadeClassifier face_cascade = CascadeClassifier(path + "haarcascade_frontalfa
 CascadeClassifier eyes_cascade = CascadeClassifier(path + "haarcascade_eye_tree_eyeglasses.xml");
 
 // double...
-int scaleFactor = 5;
+int scaleFactor = 15;
 int scaleFactor_max = 100;
 
 // int...
-int minNeighbors = 5;
-int minNeighbors_max = 100;
+int minNeighbors = 3;
+int minNeighbors_max = 10;
 
 // size...
-int minSize = 5;
-int minSize_max = 100;
+int minSize = 50;
+int minSize_max = 250;
+
+double prepareDoubleValue(int min, int max, int ratio) {
+	double val = (double)min / max;
+	return val * ratio;
+}
+
+double guardRange(double value) {
+	if (value <= 1.0) value = 1.1;
+	return value;
+}
 
 void textWithShadow(string text, Point point, Scalar shadowColor) {
 	Point shadow1 = Point(point.x + 1, point.y + 1);
@@ -41,7 +51,17 @@ void textWithShadow(string text, Point point, Scalar shadowColor) {
 	putText(frame, text, point, FONT_HERSHEY_PLAIN, 1.0, Scalar(255, 255, 255));
 }
 
-void putTrackbarRealValuesOnFrame() {
+void putTrackbarRealValuesOnFrame(double scaleFactor, int minNeighbors, Size minSize) {
+	string sf_text = "Scale factor: " + format(": %.5g", scaleFactor);
+	string mn_text = "Min Neighbors: " + to_string(minNeighbors);
+	string ms_text = "Min Size: Size(" + to_string(minSize.width) + "," + to_string(minSize.height) + ")";
+
+	textWithShadow(sf_text, Point(5, 30), Scalar(150, 0, 0));
+	textWithShadow(mn_text, Point(5, 45), Scalar(0, 100, 0));
+	textWithShadow(ms_text, Point(5, 60), Scalar(0, 0, 150));
+}
+
+void putChoiceOnFrame() {
 	string mode;
 	switch (choice) {
 		case 1:
@@ -57,8 +77,8 @@ void putTrackbarRealValuesOnFrame() {
 			mode = "Face Copying";
 			break;
 	}
-	textWithShadow("Choice:", Point(5, 15), Scalar(155, 0, 0));
-	textWithShadow(mode, Point(75, 15), Scalar(0, 100, 0));
+	textWithShadow("Choice:", Point(5, 15), Scalar(100, 100, 100));
+	textWithShadow(mode, Point(75, 15), Scalar(150, 0, 150));
 }
 
 int choiceChange() {
@@ -75,11 +95,11 @@ int choiceChange() {
 
 void ValueChanger() {
 	vector<Rect> faces;
-	face_cascade.detectMultiScale(gray, faces);
-	//face_cascade.detectMultiScale(gray, faces, (double)scaleFactor, minNeighbors, 0, Size(minSize, minSize));
+	double newScaleFactor = guardRange(prepareDoubleValue(scaleFactor, scaleFactor_max, 10));
+	Size newMinSize = Size(minSize, minSize);
+	putTrackbarRealValuesOnFrame(newScaleFactor, minNeighbors, newMinSize);
 
-	Rect firstFace;
-	if (faces.size() > 0) firstFace = faces[0];
+	face_cascade.detectMultiScale(gray, faces, newScaleFactor, minNeighbors, 0, newMinSize);
 
 	for (int i = 0; i < faces.size(); i++) {
 		if (choice == 1) {
@@ -93,8 +113,8 @@ void ValueChanger() {
 
 		Mat faceROI = gray(faces[i]);
 		vector<Rect> eyes;
-		eyes_cascade.detectMultiScale(faceROI, eyes);
-		//eyes_cascade.detectMultiScale(faceROI, eyes, (double)scaleFactor, minNeighbors, 0, Size(minSize, minSize));
+
+		eyes_cascade.detectMultiScale(faceROI, eyes, newScaleFactor, minNeighbors, 0, newMinSize/4);
 	
 		if (choice == 1) {
 			for (int j = 0; j < eyes.size(); j++) {
@@ -106,19 +126,17 @@ void ValueChanger() {
 
 		if (choice == 3) {
 			if (eyes.size() >= 2) {
-				Point eye_center1(faces[i].x + eyes[0].x + eyes[0].width / 2, faces[i].y + eyes[0].y + eyes[0].height / 2);
-				Point eye_center2(faces[i].x + eyes[1].x + eyes[1].width / 2, faces[i].y + eyes[1].y + eyes[1].height / 2);
-
-
-				Point bottomLeft(min(eye_center1.x, eye_center2.x)*0.8, min(eye_center1.y, eye_center2.y)*0.9);
-				Point topRight(max(eye_center1.x, eye_center2.x)*1.2, max(eye_center1.y, eye_center2.y)*1.1);
-
-				Rect censored_black = Rect(bottomLeft, topRight);
+				int y = faces[i].y + max(eyes[0].y, eyes[1].y);
+				int height = (eyes[0].height, eyes[1].height);
+				Rect censored_black = Rect(faces[i].x, y, faces[i].width, height);
 				rectangle(frame, censored_black, Scalar(0, 0, 0), CV_FILLED);
 			}
 		}
 
 		if (choice == 4) {
+			Rect firstFace;
+			if (faces.size() > 0) firstFace = faces[0];
+
 			if (faces.size() > 1 && !firstFace.empty()) {
 				Mat face = frame(firstFace);
 				//imshow("face", face);
@@ -144,9 +162,9 @@ int main() {
 	double dWidth = cap.set(CV_CAP_PROP_FRAME_WIDTH, 640);
 	double dHeight = cap.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
 
-	//createTrackbar("scaleFactor", "window", &scaleFactor, scaleFactor_max, ValueChange);
-	//createTrackbar("minNeighbors", "window", &minNeighbors, minNeighbors_max, ValueChange);
-	//createTrackbar("minSize", "window", &minSize, minSize_max, ValueChange);
+	createTrackbar("scaleFactor", "window", &scaleFactor, scaleFactor_max, ValueChange);
+	createTrackbar("minNeighbors", "window", &minNeighbors, minNeighbors_max, ValueChange);
+	createTrackbar("minSize", "window", &minSize, minSize_max, ValueChange);
 
 	while (1) {
 		try {
@@ -159,7 +177,7 @@ int main() {
 			equalizeHist(gray, gray);
 
 			choiceChange();
-			putTrackbarRealValuesOnFrame();
+			putChoiceOnFrame();
 			ValueChanger();
 
 			imshow("window", frame);
