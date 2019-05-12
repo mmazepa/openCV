@@ -107,14 +107,11 @@ void ValueChanger() {
 			int face_radius = cvRound((faces[i].width + faces[i].height)*0.25);
 			circle(frame, center, face_radius, Scalar(0, 100, 0), 3);
 		}
-			
-		if (choice == 2)
-			GaussianBlur(frame(faces[i]), frame(faces[i]), Size(0, 0), 10);
 
 		Mat faceROI = gray(faces[i]);
 		vector<Rect> eyes;
 
-		eyes_cascade.detectMultiScale(faceROI, eyes, newScaleFactor, minNeighbors, 0, newMinSize/4);
+		eyes_cascade.detectMultiScale(faceROI, eyes, newScaleFactor, minNeighbors, 0, newMinSize/2);
 	
 		if (choice == 1) {
 			for (int j = 0; j < eyes.size(); j++) {
@@ -123,6 +120,9 @@ void ValueChanger() {
 				circle(frame, eye_center, eye_radius, Scalar(0, 0, 200), 3);
 			}
 		}
+
+		if (choice == 2)
+			GaussianBlur(frame(faces[i]), frame(faces[i]), Size(0, 0), 10);
 
 		if (choice == 3) {
 			if (eyes.size() >= 2) {
@@ -139,7 +139,6 @@ void ValueChanger() {
 
 			if (faces.size() > 1 && !firstFace.empty()) {
 				Mat face = frame(firstFace);
-				//imshow("face", face);
 				if (i > 0 && !face.empty()) {
 					resize(face, face, Size(faces[i].width, faces[i].height), 0, 0, INTER_CUBIC);
 					face.copyTo(frame(faces[i]));
@@ -155,7 +154,6 @@ void ValueChange(int, void*) {
 
 int main() {
 	cap.open(0);
-	//cap.open("C:/Users/Mariusz/Desktop/opencv_tmp/faces_sample.mp4");
 
 	namedWindow("window", CV_WINDOW_AUTOSIZE);
 
