@@ -67,12 +67,12 @@ cyfrowych i sekwencji wideo w OpenCV w roku akademickim 2018/2019.
 	</tr>
 		<tr>
 		<td>Lab 12</td>
-		<td>20.05.2019</td>
+		<td>27.05.2019</td>
 		<td>-</td>
 	</tr>
 		<tr>
 		<td>Lab 13</td>
-		<td>27.05.2019</td>
+		<td>03.06.2019</td>
 		<td>-</td>
 	</tr>
 </table>
