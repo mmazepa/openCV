@@ -2,6 +2,7 @@
 
 #include<opencv2/highgui/highgui.hpp>
 #include<opencv2/imgproc/imgproc.hpp>
+#include<opencv2/objdetect/objdetect.hpp>
 #include<iostream>
 #include<conio.h>
 
@@ -18,7 +19,35 @@ namespace opencvproject {
 	using namespace std;
 
 	VideoCapture cap;
-	Mat frame;
+	Mat frame, gray;
+
+	int choice = 1;
+
+	cv::String path = "M:/Programy/OpenCV/opencv/sources/data/haarcascades/";
+	CascadeClassifier face_cascade = CascadeClassifier(path + "haarcascade_frontalface_default.xml");
+	CascadeClassifier eyes_cascade = CascadeClassifier(path + "haarcascade_eye_tree_eyeglasses.xml");
+
+	// double...
+	int scaleFactor = 15;
+	int scaleFactor_max = 100;
+
+	// int...
+	int minNeighbors = 3;
+	int minNeighbors_max = 10;
+
+	// size...
+	int minSize = 50;
+	int minSize_max = 250;
+
+	double prepareDoubleValue(int min, int max, int ratio) {
+		double val = (double)min / max;
+		return val * ratio;
+	}
+
+	double guardRange(double value) {
+		if (value <= 1.0) value = 1.1;
+		return value;
+	}
 
 	public ref class ProjectForm : public System::Windows::Forms::Form
 	{
@@ -113,8 +142,9 @@ namespace opencvproject {
 			this->button2->Name = L"button2";
 			this->button2->Size = System::Drawing::Size(150, 25);
 			this->button2->TabIndex = 4;
-			this->button2->Text = L"Normal";
+			this->button2->Text = L"Standard";
 			this->button2->UseVisualStyleBackColor = false;
+			this->button2->Click += gcnew System::EventHandler(this, &ProjectForm::button2_Click);
 			// 
 			// button3
 			// 
@@ -132,6 +162,7 @@ namespace opencvproject {
 			this->button3->TabIndex = 5;
 			this->button3->Text = L"Blur";
 			this->button3->UseVisualStyleBackColor = false;
+			this->button3->Click += gcnew System::EventHandler(this, &ProjectForm::button3_Click);
 			// 
 			// button4
 			// 
@@ -149,6 +180,7 @@ namespace opencvproject {
 			this->button4->TabIndex = 6;
 			this->button4->Text = L"Black Rectangle";
 			this->button4->UseVisualStyleBackColor = false;
+			this->button4->Click += gcnew System::EventHandler(this, &ProjectForm::button4_Click);
 			// 
 			// button5
 			// 
@@ -166,6 +198,7 @@ namespace opencvproject {
 			this->button5->TabIndex = 7;
 			this->button5->Text = L"Face Copying";
 			this->button5->UseVisualStyleBackColor = false;
+			this->button5->Click += gcnew System::EventHandler(this, &ProjectForm::button5_Click);
 			// 
 			// ProjectForm
 			// 
@@ -184,7 +217,7 @@ namespace opencvproject {
 			this->MaximizeBox = false;
 			this->Name = L"ProjectForm";
 			this->StartPosition = System::Windows::Forms::FormStartPosition::CenterScreen;
-			this->Text = L"OpenCV Projekt";
+			this->Text = L"Face Detection Project 2019";
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->EndInit();
 			this->ResumeLayout(false);
 
@@ -204,11 +237,86 @@ namespace opencvproject {
 		}
 	}
 private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e) {
-	cap >> frame;
-	if (!frame.empty()) {
-		pictureBox1->Image = gcnew System::Drawing::Bitmap(frame.cols, frame.rows, frame.step, System::Drawing::Imaging::PixelFormat::Format24bppRgb, (System::IntPtr) frame.data);
-		pictureBox1->Refresh();
+	try {
+		cap >> frame;
+		if (frame.empty()) {
+			cap.set(CAP_PROP_POS_FRAMES, 0);
+			cap >> frame;
+		}
+		cvtColor(frame, gray, CV_RGB2GRAY);
+		equalizeHist(gray, gray);
+
+		vector<Rect> faces;
+		double newScaleFactor = guardRange(prepareDoubleValue(scaleFactor, scaleFactor_max, 10));
+		cv::Size newMinSize = cv::Size(minSize, minSize);
+
+		face_cascade.detectMultiScale(gray, faces, newScaleFactor, minNeighbors, 0, newMinSize);
+
+		for (int i = 0; i < faces.size(); i++) {
+			if (choice == 1) {
+				cv::Point center(faces[i].x + faces[i].width / 2, faces[i].y + faces[i].height / 2);
+				int face_radius = cvRound((faces[i].width + faces[i].height)*0.25);
+				circle(frame, center, face_radius, Scalar(0, 100, 0), 3);
+			}
+
+			Mat faceROI = gray(faces[i]);
+			vector<Rect> eyes;
+
+			eyes_cascade.detectMultiScale(faceROI, eyes, newScaleFactor, minNeighbors, 0, newMinSize / 2);
+
+			if (choice == 1) {
+				for (int j = 0; j < eyes.size(); j++) {
+					cv::Point eye_center(faces[i].x + eyes[j].x + eyes[j].width / 2, faces[i].y + eyes[j].y + eyes[j].height / 2);
+					int eye_radius = cvRound((eyes[j].width + eyes[j].height)*0.25);
+					circle(frame, eye_center, eye_radius, Scalar(0, 0, 200), 3);
+				}
+			}
+
+			if (choice == 2)
+				GaussianBlur(frame(faces[i]), frame(faces[i]), cv::Size(0, 0), 10);
+
+			if (choice == 3) {
+				if (eyes.size() >= 2) {
+					int y = faces[i].y + max(eyes[0].y, eyes[1].y);
+					int height = (eyes[0].height, eyes[1].height);
+					Rect censored_black = Rect(faces[i].x, y, faces[i].width, height);
+					rectangle(frame, censored_black, Scalar(0, 0, 0), CV_FILLED);
+				}
+			}
+
+			if (choice == 4) {
+				Rect firstFace;
+				if (faces.size() > 0) firstFace = faces[0];
+
+				if (faces.size() > 1 && !firstFace.empty()) {
+					Mat face = frame(firstFace);
+					if (i > 0 && !face.empty()) {
+						resize(face, face, cv::Size(faces[i].width, faces[i].height), 0, 0, INTER_CUBIC);
+						face.copyTo(frame(faces[i]));
+					}
+				}
+			}
+		}
+
+		if (!frame.empty()) {
+			pictureBox1->Image = gcnew System::Drawing::Bitmap(frame.cols, frame.rows, frame.step, System::Drawing::Imaging::PixelFormat::Format24bppRgb, (System::IntPtr) frame.data);
+			pictureBox1->Refresh();
+		}
+	} catch (cv::Exception e) {
+		cap.open(1);
 	}
+}
+private: System::Void button2_Click(System::Object^  sender, System::EventArgs^  e) {
+	choice = 1;
+}
+private: System::Void button3_Click(System::Object^  sender, System::EventArgs^  e) {
+	choice = 2;
+}
+private: System::Void button4_Click(System::Object^  sender, System::EventArgs^  e) {
+	choice = 3;
+}
+private: System::Void button5_Click(System::Object^  sender, System::EventArgs^  e) {
+	choice = 4;
 }
 };
 }
