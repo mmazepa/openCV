@@ -25,7 +25,6 @@ namespace opencvproject {
 
 	cv::String path = "M:/Programy/OpenCV/opencv/sources/data/haarcascades/";
 	CascadeClassifier face_cascade = CascadeClassifier(path + "haarcascade_frontalface_default.xml");
-	CascadeClassifier eyes_cascade = CascadeClassifier(path + "haarcascade_eye_tree_eyeglasses.xml");
 
 	// double...
 	int scaleFactor = 15;
@@ -259,29 +258,14 @@ private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e
 				circle(frame, center, face_radius, Scalar(0, 100, 0), 3);
 			}
 
-			Mat faceROI = gray(faces[i]);
-			vector<Rect> eyes;
-
-			eyes_cascade.detectMultiScale(faceROI, eyes, newScaleFactor, minNeighbors, 0, newMinSize / 2);
-
-			if (choice == 1) {
-				for (int j = 0; j < eyes.size(); j++) {
-					cv::Point eye_center(faces[i].x + eyes[j].x + eyes[j].width / 2, faces[i].y + eyes[j].y + eyes[j].height / 2);
-					int eye_radius = cvRound((eyes[j].width + eyes[j].height)*0.25);
-					circle(frame, eye_center, eye_radius, Scalar(0, 0, 200), 3);
-				}
-			}
-
 			if (choice == 2)
 				GaussianBlur(frame(faces[i]), frame(faces[i]), cv::Size(0, 0), 10);
 
 			if (choice == 3) {
-				if (eyes.size() >= 2) {
-					int y = faces[i].y + max(eyes[0].y, eyes[1].y);
-					int height = (eyes[0].height, eyes[1].height);
-					Rect censored_black = Rect(faces[i].x, y, faces[i].width, height);
-					rectangle(frame, censored_black, Scalar(0, 0, 0), CV_FILLED);
-				}
+				int y = faces[i].y * 1.3;
+				int height = faces[i].height * 0.3;
+				Rect censored_black = Rect(faces[i].x, y, faces[i].width, height);
+				rectangle(frame, censored_black, Scalar(0, 0, 0), CV_FILLED);
 			}
 
 			if (choice == 4) {
