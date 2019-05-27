@@ -23,10 +23,26 @@
     <ClInclude Include="ProjectForm.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ProjectForm.resx">
       <Filter>Pliki zasobów</Filter>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="opencv_project.rc">
+      <Filter>Pliki zasobów</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\opencv_tmp\projekt\guziki\button_green.png">
+      <Filter>Pliki zasobów</Filter>
+    </Image>
+    <Image Include="..\..\..\opencv_tmp\projekt\guziki\button_purple.png">
+      <Filter>Pliki zasobów</Filter>
+    </Image>
   </ItemGroup>
 </Project>

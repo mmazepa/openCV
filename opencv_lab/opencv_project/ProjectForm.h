@@ -30,16 +30,6 @@ namespace opencvproject {
 	int minNeighbors = 3;
 	int minSize = 50;
 
-	double prepareDoubleValue(int min, int max, int ratio) {
-		double val = (double)min / max;
-		return val * ratio;
-	}
-
-	double guardRange(double value) {
-		if (value <= 1.0) value = 1.1;
-		return value;
-	}
-
 	public ref class ProjectForm : public System::Windows::Forms::Form
 	{
 	public:
@@ -304,6 +294,7 @@ namespace opencvproject {
 			this->Name = L"ProjectForm";
 			this->StartPosition = System::Windows::Forms::FormStartPosition::CenterScreen;
 			this->Text = L"Face Detection Project 2019";
+			this->Load += gcnew System::EventHandler(this, &ProjectForm::ProjectForm_Load);
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->EndInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown1))->EndInit();
 			this->panel1->ResumeLayout(false);
@@ -314,19 +305,22 @@ namespace opencvproject {
 
 		}
 #pragma endregion
-	private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
-		if (button1->Text == L"START") {
-			timer1->Start();
-			if (!cap.isOpened()) cap.open(0);
-			button1->Text = L"STOP";
-		} else if (button1->Text == L"STOP") {
-			timer1->Stop();
-			cap.release();
-			frame.release();
-			pictureBox1->Image = nullptr;
-			button1->Text = L"START";
-		}
+private: System::Void ProjectForm_Load(System::Object^  sender, System::EventArgs^  e) {
+	button2->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_purple.png");
+}
+private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
+	if (button1->Text == L"START") {
+		timer1->Start();
+		if (!cap.isOpened()) cap.open(0);
+		button1->Text = L"STOP";
+	} else if (button1->Text == L"STOP") {
+		timer1->Stop();
+		cap.release();
+		frame.release();
+		pictureBox1->Image = nullptr;
+		button1->Text = L"START";
 	}
+}
 private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e) {
 	try {
 		cap >> frame;
@@ -384,15 +378,31 @@ private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e
 }
 private: System::Void button2_Click(System::Object^  sender, System::EventArgs^  e) {
 	choice = 1;
+	button2->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_purple.png");
+	button3->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_green.png");
+	button4->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_green.png");
+	button5->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_green.png");
 }
 private: System::Void button3_Click(System::Object^  sender, System::EventArgs^  e) {
 	choice = 2;
+	button2->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_green.png");
+	button3->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_purple.png");	
+	button4->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_green.png");
+	button5->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_green.png");
 }
 private: System::Void button4_Click(System::Object^  sender, System::EventArgs^  e) {
 	choice = 3;
+	button2->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_green.png");
+	button3->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_green.png");
+	button4->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_purple.png");
+	button5->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_green.png");
 }
 private: System::Void button5_Click(System::Object^  sender, System::EventArgs^  e) {
 	choice = 4;
+	button2->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_green.png");
+	button3->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_green.png");
+	button4->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_green.png");	
+	button5->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_purple.png");
 }
 private: System::Void numericUpDown1_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
 	scaleFactor = (double) numericUpDown1->Value;

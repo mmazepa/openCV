@@ -141,11 +141,19 @@
     <ClInclude Include="ProjectForm.h">
       <FileType>CppForm</FileType>
     </ClInclude>
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ProjectForm.resx">
       <DependentUpon>ProjectForm.h</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="opencv_project.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\opencv_tmp\projekt\guziki\button_green.png" />
+    <Image Include="..\..\..\opencv_tmp\projekt\guziki\button_purple.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
