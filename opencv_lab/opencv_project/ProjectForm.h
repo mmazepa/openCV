@@ -26,17 +26,9 @@ namespace opencvproject {
 	cv::String path = "M:/Programy/OpenCV/opencv/sources/data/haarcascades/";
 	CascadeClassifier face_cascade = CascadeClassifier(path + "haarcascade_frontalface_default.xml");
 
-	// double...
-	int scaleFactor = 15;
-	int scaleFactor_max = 100;
-
-	// int...
+	double scaleFactor = 1.5;
 	int minNeighbors = 3;
-	int minNeighbors_max = 10;
-
-	// size...
 	int minSize = 50;
-	int minSize_max = 250;
 
 	double prepareDoubleValue(int min, int max, int ratio) {
 		double val = (double)min / max;
@@ -73,6 +65,13 @@ namespace opencvproject {
 	private: System::Windows::Forms::Button^  button3;
 	private: System::Windows::Forms::Button^  button4;
 	private: System::Windows::Forms::Button^  button5;
+	private: System::Windows::Forms::NumericUpDown^  numericUpDown1;
+	private: System::Windows::Forms::Panel^  panel1;
+	private: System::Windows::Forms::Label^  label1;
+	private: System::Windows::Forms::Label^  label2;
+	private: System::Windows::Forms::NumericUpDown^  numericUpDown2;
+	private: System::Windows::Forms::Label^  label3;
+	private: System::Windows::Forms::NumericUpDown^  numericUpDown3;
 	private: System::ComponentModel::IContainer^  components;
 
 #pragma region Windows Form Designer generated code
@@ -87,7 +86,18 @@ namespace opencvproject {
 			this->button3 = (gcnew System::Windows::Forms::Button());
 			this->button4 = (gcnew System::Windows::Forms::Button());
 			this->button5 = (gcnew System::Windows::Forms::Button());
+			this->numericUpDown1 = (gcnew System::Windows::Forms::NumericUpDown());
+			this->panel1 = (gcnew System::Windows::Forms::Panel());
+			this->label3 = (gcnew System::Windows::Forms::Label());
+			this->numericUpDown3 = (gcnew System::Windows::Forms::NumericUpDown());
+			this->label2 = (gcnew System::Windows::Forms::Label());
+			this->numericUpDown2 = (gcnew System::Windows::Forms::NumericUpDown());
+			this->label1 = (gcnew System::Windows::Forms::Label());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown1))->BeginInit();
+			this->panel1->SuspendLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown3))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown2))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// button1
@@ -102,7 +112,7 @@ namespace opencvproject {
 			this->button1->FlatStyle = System::Windows::Forms::FlatStyle::Flat;
 			this->button1->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(238)));
-			this->button1->Location = System::Drawing::Point(15, 521);
+			this->button1->Location = System::Drawing::Point(16, 570);
 			this->button1->Name = L"button1";
 			this->button1->Size = System::Drawing::Size(639, 43);
 			this->button1->TabIndex = 1;
@@ -116,7 +126,7 @@ namespace opencvproject {
 			this->pictureBox1->BackgroundImage = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"pictureBox1.BackgroundImage")));
 			this->pictureBox1->BackgroundImageLayout = System::Windows::Forms::ImageLayout::Center;
 			this->pictureBox1->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
-			this->pictureBox1->Location = System::Drawing::Point(15, 44);
+			this->pictureBox1->Location = System::Drawing::Point(15, 94);
 			this->pictureBox1->Name = L"pictureBox1";
 			this->pictureBox1->Size = System::Drawing::Size(640, 480);
 			this->pictureBox1->TabIndex = 3;
@@ -137,7 +147,7 @@ namespace opencvproject {
 			this->button2->FlatAppearance->MouseDownBackColor = System::Drawing::Color::Transparent;
 			this->button2->FlatAppearance->MouseOverBackColor = System::Drawing::Color::Transparent;
 			this->button2->FlatStyle = System::Windows::Forms::FlatStyle::Flat;
-			this->button2->Location = System::Drawing::Point(15, 12);
+			this->button2->Location = System::Drawing::Point(5, 10);
 			this->button2->Name = L"button2";
 			this->button2->Size = System::Drawing::Size(150, 25);
 			this->button2->TabIndex = 4;
@@ -155,7 +165,7 @@ namespace opencvproject {
 			this->button3->FlatAppearance->MouseDownBackColor = System::Drawing::Color::Transparent;
 			this->button3->FlatAppearance->MouseOverBackColor = System::Drawing::Color::Transparent;
 			this->button3->FlatStyle = System::Windows::Forms::FlatStyle::Flat;
-			this->button3->Location = System::Drawing::Point(177, 12);
+			this->button3->Location = System::Drawing::Point(161, 10);
 			this->button3->Name = L"button3";
 			this->button3->Size = System::Drawing::Size(150, 25);
 			this->button3->TabIndex = 5;
@@ -173,7 +183,7 @@ namespace opencvproject {
 			this->button4->FlatAppearance->MouseDownBackColor = System::Drawing::Color::Transparent;
 			this->button4->FlatAppearance->MouseOverBackColor = System::Drawing::Color::Transparent;
 			this->button4->FlatStyle = System::Windows::Forms::FlatStyle::Flat;
-			this->button4->Location = System::Drawing::Point(343, 12);
+			this->button4->Location = System::Drawing::Point(329, 10);
 			this->button4->Name = L"button4";
 			this->button4->Size = System::Drawing::Size(150, 25);
 			this->button4->TabIndex = 6;
@@ -191,7 +201,7 @@ namespace opencvproject {
 			this->button5->FlatAppearance->MouseDownBackColor = System::Drawing::Color::Transparent;
 			this->button5->FlatAppearance->MouseOverBackColor = System::Drawing::Color::Transparent;
 			this->button5->FlatStyle = System::Windows::Forms::FlatStyle::Flat;
-			this->button5->Location = System::Drawing::Point(505, 12);
+			this->button5->Location = System::Drawing::Point(485, 10);
 			this->button5->Name = L"button5";
 			this->button5->Size = System::Drawing::Size(150, 25);
 			this->button5->TabIndex = 7;
@@ -199,16 +209,93 @@ namespace opencvproject {
 			this->button5->UseVisualStyleBackColor = false;
 			this->button5->Click += gcnew System::EventHandler(this, &ProjectForm::button5_Click);
 			// 
+			// numericUpDown1
+			// 
+			this->numericUpDown1->DecimalPlaces = 2;
+			this->numericUpDown1->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) { 1, 0, 0, 131072 });
+			this->numericUpDown1->Location = System::Drawing::Point(80, 41);
+			this->numericUpDown1->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 5, 0, 0, 0 });
+			this->numericUpDown1->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 11, 0, 0, 65536 });
+			this->numericUpDown1->Name = L"numericUpDown1";
+			this->numericUpDown1->Size = System::Drawing::Size(75, 20);
+			this->numericUpDown1->TabIndex = 8;
+			this->numericUpDown1->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) { 15, 0, 0, 65536 });
+			this->numericUpDown1->ValueChanged += gcnew System::EventHandler(this, &ProjectForm::numericUpDown1_ValueChanged);
+			// 
+			// panel1
+			// 
+			this->panel1->BackColor = System::Drawing::SystemColors::ButtonFace;
+			this->panel1->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
+			this->panel1->Controls->Add(this->label3);
+			this->panel1->Controls->Add(this->numericUpDown3);
+			this->panel1->Controls->Add(this->label2);
+			this->panel1->Controls->Add(this->numericUpDown2);
+			this->panel1->Controls->Add(this->label1);
+			this->panel1->Controls->Add(this->button2);
+			this->panel1->Controls->Add(this->numericUpDown1);
+			this->panel1->Controls->Add(this->button5);
+			this->panel1->Controls->Add(this->button3);
+			this->panel1->Controls->Add(this->button4);
+			this->panel1->Location = System::Drawing::Point(15, 13);
+			this->panel1->Name = L"panel1";
+			this->panel1->Size = System::Drawing::Size(640, 70);
+			this->panel1->TabIndex = 9;
+			// 
+			// label3
+			// 
+			this->label3->AutoSize = true;
+			this->label3->Location = System::Drawing::Point(355, 43);
+			this->label3->Name = L"label3";
+			this->label3->Size = System::Drawing::Size(43, 13);
+			this->label3->TabIndex = 13;
+			this->label3->Text = L"minSize";
+			// 
+			// numericUpDown3
+			// 
+			this->numericUpDown3->Location = System::Drawing::Point(404, 41);
+			this->numericUpDown3->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 250, 0, 0, 0 });
+			this->numericUpDown3->Name = L"numericUpDown3";
+			this->numericUpDown3->Size = System::Drawing::Size(75, 20);
+			this->numericUpDown3->TabIndex = 12;
+			this->numericUpDown3->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) { 50, 0, 0, 0 });
+			this->numericUpDown3->ValueChanged += gcnew System::EventHandler(this, &ProjectForm::numericUpDown3_ValueChanged);
+			// 
+			// label2
+			// 
+			this->label2->AutoSize = true;
+			this->label2->Location = System::Drawing::Point(161, 43);
+			this->label2->Name = L"label2";
+			this->label2->Size = System::Drawing::Size(71, 13);
+			this->label2->TabIndex = 11;
+			this->label2->Text = L"minNeighbors";
+			// 
+			// numericUpDown2
+			// 
+			this->numericUpDown2->Location = System::Drawing::Point(236, 41);
+			this->numericUpDown2->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 10, 0, 0, 0 });
+			this->numericUpDown2->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 1, 0, 0, 0 });
+			this->numericUpDown2->Name = L"numericUpDown2";
+			this->numericUpDown2->Size = System::Drawing::Size(75, 20);
+			this->numericUpDown2->TabIndex = 10;
+			this->numericUpDown2->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) { 3, 0, 0, 0 });
+			this->numericUpDown2->ValueChanged += gcnew System::EventHandler(this, &ProjectForm::numericUpDown2_ValueChanged);
+			// 
+			// label1
+			// 
+			this->label1->AutoSize = true;
+			this->label1->Location = System::Drawing::Point(12, 43);
+			this->label1->Name = L"label1";
+			this->label1->Size = System::Drawing::Size(62, 13);
+			this->label1->TabIndex = 9;
+			this->label1->Text = L"scaleFactor";
+			// 
 			// ProjectForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->BackgroundImage = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"$this.BackgroundImage")));
-			this->ClientSize = System::Drawing::Size(669, 561);
-			this->Controls->Add(this->button5);
-			this->Controls->Add(this->button4);
-			this->Controls->Add(this->button3);
-			this->Controls->Add(this->button2);
+			this->ClientSize = System::Drawing::Size(669, 611);
+			this->Controls->Add(this->panel1);
 			this->Controls->Add(this->pictureBox1);
 			this->Controls->Add(this->button1);
 			this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::FixedSingle;
@@ -218,6 +305,11 @@ namespace opencvproject {
 			this->StartPosition = System::Windows::Forms::FormStartPosition::CenterScreen;
 			this->Text = L"Face Detection Project 2019";
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown1))->EndInit();
+			this->panel1->ResumeLayout(false);
+			this->panel1->PerformLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown3))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown2))->EndInit();
 			this->ResumeLayout(false);
 
 		}
@@ -246,15 +338,15 @@ private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e
 		equalizeHist(gray, gray);
 
 		vector<Rect> faces;
-		double newScaleFactor = guardRange(prepareDoubleValue(scaleFactor, scaleFactor_max, 10));
 		cv::Size newMinSize = cv::Size(minSize, minSize);
 
-		face_cascade.detectMultiScale(gray, faces, newScaleFactor, minNeighbors, 0, newMinSize);
+		face_cascade.detectMultiScale(gray, faces, scaleFactor, minNeighbors, 0, newMinSize);
 
 		for (int i = 0; i < faces.size(); i++) {
+			int face_radius = cvRound((faces[i].width + faces[i].height)*0.25);
+
 			if (choice == 1) {
 				cv::Point center(faces[i].x + faces[i].width / 2, faces[i].y + faces[i].height / 2);
-				int face_radius = cvRound((faces[i].width + faces[i].height)*0.25);
 				circle(frame, center, face_radius, Scalar(0, 100, 0), 3);
 			}
 
@@ -262,7 +354,7 @@ private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e
 				GaussianBlur(frame(faces[i]), frame(faces[i]), cv::Size(0, 0), 10);
 
 			if (choice == 3) {
-				int y = faces[i].y * 1.3;
+				int y = faces[i].y + face_radius/2;
 				int height = faces[i].height * 0.3;
 				Rect censored_black = Rect(faces[i].x, y, faces[i].width, height);
 				rectangle(frame, censored_black, Scalar(0, 0, 0), CV_FILLED);
@@ -301,6 +393,15 @@ private: System::Void button4_Click(System::Object^  sender, System::EventArgs^ 
 }
 private: System::Void button5_Click(System::Object^  sender, System::EventArgs^  e) {
 	choice = 4;
+}
+private: System::Void numericUpDown1_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
+	scaleFactor = (double) numericUpDown1->Value;
+}
+private: System::Void numericUpDown2_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
+	minNeighbors = (int) numericUpDown2->Value;
+}
+private: System::Void numericUpDown3_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
+	minSize = (int) numericUpDown3->Value;
 }
 };
 }
