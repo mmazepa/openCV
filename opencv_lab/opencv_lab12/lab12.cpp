@@ -1,4 +1,4 @@
-#include<opencv2/highgui/highgui.hpp>
+﻿#include<opencv2/highgui/highgui.hpp>
 #include<opencv2/imgproc/imgproc.hpp>
 #include<iostream>
 #include<conio.h>
@@ -58,6 +58,10 @@ string prepareDateTime(string purpose) {
 	return locDateTime;
 }
 
+void putTextOnFrame(Mat frame, string text, Point point, double scale, Scalar color) {
+	putText(frame, text, point, FONT_HERSHEY_PLAIN, scale, color, 2);
+}
+
 int main() {
 	cap.open(0);
 	namedWindow("window", CV_WINDOW_AUTOSIZE);
@@ -84,7 +88,7 @@ int main() {
 			string datetimeFrame = prepareDateTime("frame");
 			string datetimeFile = prepareDateTime("filename");
 
-			putText(frameToDisplay, datetimeFrame, Point(15, 465), FONT_HERSHEY_PLAIN, 1.25, Scalar(0, 255, 0), 2);
+			putTextOnFrame(frameToDisplay, datetimeFrame, Point(15, 465), 1.25, Scalar(0, 255, 0));
 			string videoName = "video_" + datetimeFile + ".avi";
 
 			Mat frameStatus = frameToDisplay.clone();
@@ -116,7 +120,7 @@ int main() {
 				currentState = "Stopped!";
 			}
 
-			putText(frameStatus, currentState, Point(15, 25), FONT_HERSHEY_PLAIN, 1.0, Scalar(0, 0, 255), 2);
+			putTextOnFrame(frameStatus, currentState, Point(15, 25), 1.0, Scalar(0, 0, 255));
 
 			imshow("window", frameStatus);
 			frame2 = frame1.clone();
@@ -126,6 +130,7 @@ int main() {
 
 		if (waitKey(15) == 27) {
 			cap.release();
+			outputVideo.release();
 			destroyAllWindows();
 			return 0;
 		}
