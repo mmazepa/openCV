@@ -32,6 +32,7 @@ namespace opencvproject {
 	int minSize = 50;
 
 	string facePath = "";
+	VideoWriter outputVideo;
 
 	public ref class ProjectForm : public System::Windows::Forms::Form
 	{
@@ -69,6 +70,7 @@ namespace opencvproject {
 	private: System::Windows::Forms::Button^  button7;
 	private: System::Windows::Forms::Label^  label4;
 	private: System::Windows::Forms::TextBox^  textBox1;
+	private: System::Windows::Forms::Button^  button8;
 
 	private: System::ComponentModel::IContainer^  components;
 
@@ -95,6 +97,7 @@ namespace opencvproject {
 			this->label2 = (gcnew System::Windows::Forms::Label());
 			this->numericUpDown2 = (gcnew System::Windows::Forms::NumericUpDown());
 			this->label1 = (gcnew System::Windows::Forms::Label());
+			this->button8 = (gcnew System::Windows::Forms::Button());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown1))->BeginInit();
 			this->panel1->SuspendLayout();
@@ -328,12 +331,26 @@ namespace opencvproject {
 			this->label1->TabIndex = 9;
 			this->label1->Text = L"scaleFactor:";
 			// 
+			// button8
+			// 
+			this->button8->BackColor = System::Drawing::Color::CornflowerBlue;
+			this->button8->Cursor = System::Windows::Forms::Cursors::Hand;
+			this->button8->FlatStyle = System::Windows::Forms::FlatStyle::Flat;
+			this->button8->Location = System::Drawing::Point(25, 150);
+			this->button8->Name = L"button8";
+			this->button8->Size = System::Drawing::Size(100, 25);
+			this->button8->TabIndex = 10;
+			this->button8->Text = L"Record Video";
+			this->button8->UseVisualStyleBackColor = false;
+			this->button8->Click += gcnew System::EventHandler(this, &ProjectForm::button8_Click);
+			// 
 			// ProjectForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->BackgroundImage = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"$this.BackgroundImage")));
 			this->ClientSize = System::Drawing::Size(669, 661);
+			this->Controls->Add(this->button8);
 			this->Controls->Add(this->panel1);
 			this->Controls->Add(this->pictureBox1);
 			this->Controls->Add(this->button1);
@@ -411,9 +428,6 @@ private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e
 
 			if (choice == 4 || choice == 5) {
 				Mat face;
-				//string facesPath = "C:/Users/Mariusz/Desktop/opencv_tmp/projekt/twarze/";
-				//string wantedFace = facesPath + "chuck_norris.png";
-				//string facePath = "";
 				
 				if (faces.size() > 0) {
 					if (choice == 4) {
@@ -435,6 +449,9 @@ private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e
 		if (!frame.empty()) {
 			pictureBox1->Image = gcnew System::Drawing::Bitmap(frame.cols, frame.rows, frame.step, System::Drawing::Imaging::PixelFormat::Format24bppRgb, (System::IntPtr) frame.data);
 			pictureBox1->Refresh();
+			if (outputVideo.isOpened()) {
+				outputVideo.write(frame);
+			}
 		}
 	} catch (cv::Exception e) {
 		cap.open(1);
@@ -498,6 +515,23 @@ private: System::Void button6_Click(System::Object^  sender, System::EventArgs^ 
 private: System::Void button7_Click(System::Object^  sender, System::EventArgs^  e) {
 	msclr::interop::marshal_context context;
 	facePath = context.marshal_as<std::string>(this->textBox1->Text);
+}
+private: System::Void button8_Click(System::Object^  sender, System::EventArgs^  e) {
+	if (button8->Text == "Record Video") {
+		this->button8->Text = "Stop";
+
+		string path = "C:/Users/Mariusz/Desktop/opencv_tmp/projekt/nagrania/";
+		string outputVideoName = "recorded_sample.avi";
+		string outputPath = path + outputVideoName;
+
+		int codec = CV_FOURCC('M', 'J', 'P', 'G');
+		cv::Size size = cv::Size(640, 480);
+		
+		outputVideo.open(outputPath, codec, 15, size, true);
+	} else if (button8->Text == "Stop") {
+		this->button8->Text = "Record Video";
+		outputVideo.release();
+	}
 }
 private: System::Void numericUpDown1_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
 	scaleFactor = (double) numericUpDown1->Value;
