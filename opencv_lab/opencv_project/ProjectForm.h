@@ -5,6 +5,7 @@
 #include<opencv2/objdetect/objdetect.hpp>
 #include<iostream>
 #include<conio.h>
+#include<msclr\marshal_cppstd.h>
 
 namespace opencvproject {
 
@@ -29,6 +30,8 @@ namespace opencvproject {
 	double scaleFactor = 1.5;
 	int minNeighbors = 3;
 	int minSize = 50;
+
+	string facePath = "";
 
 	public ref class ProjectForm : public System::Windows::Forms::Form
 	{
@@ -62,6 +65,11 @@ namespace opencvproject {
 	private: System::Windows::Forms::NumericUpDown^  numericUpDown2;
 	private: System::Windows::Forms::Label^  label3;
 	private: System::Windows::Forms::NumericUpDown^  numericUpDown3;
+	private: System::Windows::Forms::Button^  button6;
+	private: System::Windows::Forms::Button^  button7;
+	private: System::Windows::Forms::Label^  label4;
+	private: System::Windows::Forms::TextBox^  textBox1;
+
 	private: System::ComponentModel::IContainer^  components;
 
 #pragma region Windows Form Designer generated code
@@ -78,6 +86,10 @@ namespace opencvproject {
 			this->button5 = (gcnew System::Windows::Forms::Button());
 			this->numericUpDown1 = (gcnew System::Windows::Forms::NumericUpDown());
 			this->panel1 = (gcnew System::Windows::Forms::Panel());
+			this->button7 = (gcnew System::Windows::Forms::Button());
+			this->label4 = (gcnew System::Windows::Forms::Label());
+			this->textBox1 = (gcnew System::Windows::Forms::TextBox());
+			this->button6 = (gcnew System::Windows::Forms::Button());
 			this->label3 = (gcnew System::Windows::Forms::Label());
 			this->numericUpDown3 = (gcnew System::Windows::Forms::NumericUpDown());
 			this->label2 = (gcnew System::Windows::Forms::Label());
@@ -102,7 +114,7 @@ namespace opencvproject {
 			this->button1->FlatStyle = System::Windows::Forms::FlatStyle::Flat;
 			this->button1->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(238)));
-			this->button1->Location = System::Drawing::Point(16, 570);
+			this->button1->Location = System::Drawing::Point(15, 620);
 			this->button1->Name = L"button1";
 			this->button1->Size = System::Drawing::Size(639, 43);
 			this->button1->TabIndex = 1;
@@ -116,7 +128,7 @@ namespace opencvproject {
 			this->pictureBox1->BackgroundImage = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"pictureBox1.BackgroundImage")));
 			this->pictureBox1->BackgroundImageLayout = System::Windows::Forms::ImageLayout::Center;
 			this->pictureBox1->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
-			this->pictureBox1->Location = System::Drawing::Point(15, 94);
+			this->pictureBox1->Location = System::Drawing::Point(15, 140);
 			this->pictureBox1->Name = L"pictureBox1";
 			this->pictureBox1->Size = System::Drawing::Size(640, 480);
 			this->pictureBox1->TabIndex = 3;
@@ -129,14 +141,12 @@ namespace opencvproject {
 			// 
 			// button2
 			// 
-			this->button2->BackColor = System::Drawing::Color::Transparent;
-			this->button2->BackgroundImage = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"button2.BackgroundImage")));
+			this->button2->BackColor = System::Drawing::Color::Gray;
 			this->button2->BackgroundImageLayout = System::Windows::Forms::ImageLayout::Stretch;
 			this->button2->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->button2->FlatAppearance->BorderSize = 0;
 			this->button2->FlatAppearance->MouseDownBackColor = System::Drawing::Color::Transparent;
 			this->button2->FlatAppearance->MouseOverBackColor = System::Drawing::Color::Transparent;
-			this->button2->FlatStyle = System::Windows::Forms::FlatStyle::Flat;
 			this->button2->Location = System::Drawing::Point(5, 10);
 			this->button2->Name = L"button2";
 			this->button2->Size = System::Drawing::Size(150, 25);
@@ -147,15 +157,13 @@ namespace opencvproject {
 			// 
 			// button3
 			// 
-			this->button3->BackColor = System::Drawing::Color::Transparent;
-			this->button3->BackgroundImage = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"button3.BackgroundImage")));
+			this->button3->BackColor = System::Drawing::Color::Gray;
 			this->button3->BackgroundImageLayout = System::Windows::Forms::ImageLayout::Stretch;
 			this->button3->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->button3->FlatAppearance->BorderSize = 0;
 			this->button3->FlatAppearance->MouseDownBackColor = System::Drawing::Color::Transparent;
 			this->button3->FlatAppearance->MouseOverBackColor = System::Drawing::Color::Transparent;
-			this->button3->FlatStyle = System::Windows::Forms::FlatStyle::Flat;
-			this->button3->Location = System::Drawing::Point(161, 10);
+			this->button3->Location = System::Drawing::Point(163, 10);
 			this->button3->Name = L"button3";
 			this->button3->Size = System::Drawing::Size(150, 25);
 			this->button3->TabIndex = 5;
@@ -165,15 +173,13 @@ namespace opencvproject {
 			// 
 			// button4
 			// 
-			this->button4->BackColor = System::Drawing::Color::Transparent;
-			this->button4->BackgroundImage = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"button4.BackgroundImage")));
+			this->button4->BackColor = System::Drawing::Color::Gray;
 			this->button4->BackgroundImageLayout = System::Windows::Forms::ImageLayout::Stretch;
 			this->button4->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->button4->FlatAppearance->BorderSize = 0;
 			this->button4->FlatAppearance->MouseDownBackColor = System::Drawing::Color::Transparent;
 			this->button4->FlatAppearance->MouseOverBackColor = System::Drawing::Color::Transparent;
-			this->button4->FlatStyle = System::Windows::Forms::FlatStyle::Flat;
-			this->button4->Location = System::Drawing::Point(329, 10);
+			this->button4->Location = System::Drawing::Point(321, 10);
 			this->button4->Name = L"button4";
 			this->button4->Size = System::Drawing::Size(150, 25);
 			this->button4->TabIndex = 6;
@@ -183,15 +189,13 @@ namespace opencvproject {
 			// 
 			// button5
 			// 
-			this->button5->BackColor = System::Drawing::Color::Transparent;
-			this->button5->BackgroundImage = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"button5.BackgroundImage")));
+			this->button5->BackColor = System::Drawing::Color::Gray;
 			this->button5->BackgroundImageLayout = System::Windows::Forms::ImageLayout::Stretch;
 			this->button5->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->button5->FlatAppearance->BorderSize = 0;
 			this->button5->FlatAppearance->MouseDownBackColor = System::Drawing::Color::Transparent;
 			this->button5->FlatAppearance->MouseOverBackColor = System::Drawing::Color::Transparent;
-			this->button5->FlatStyle = System::Windows::Forms::FlatStyle::Flat;
-			this->button5->Location = System::Drawing::Point(485, 10);
+			this->button5->Location = System::Drawing::Point(479, 10);
 			this->button5->Name = L"button5";
 			this->button5->Size = System::Drawing::Size(150, 25);
 			this->button5->TabIndex = 7;
@@ -214,8 +218,13 @@ namespace opencvproject {
 			// 
 			// panel1
 			// 
-			this->panel1->BackColor = System::Drawing::SystemColors::ButtonFace;
+			this->panel1->BackColor = System::Drawing::Color::Transparent;
+			this->panel1->BackgroundImage = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"panel1.BackgroundImage")));
 			this->panel1->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
+			this->panel1->Controls->Add(this->button7);
+			this->panel1->Controls->Add(this->label4);
+			this->panel1->Controls->Add(this->textBox1);
+			this->panel1->Controls->Add(this->button6);
 			this->panel1->Controls->Add(this->label3);
 			this->panel1->Controls->Add(this->numericUpDown3);
 			this->panel1->Controls->Add(this->label2);
@@ -226,23 +235,63 @@ namespace opencvproject {
 			this->panel1->Controls->Add(this->button5);
 			this->panel1->Controls->Add(this->button3);
 			this->panel1->Controls->Add(this->button4);
-			this->panel1->Location = System::Drawing::Point(15, 13);
+			this->panel1->Location = System::Drawing::Point(15, 15);
 			this->panel1->Name = L"panel1";
-			this->panel1->Size = System::Drawing::Size(640, 70);
+			this->panel1->Size = System::Drawing::Size(640, 110);
 			this->panel1->TabIndex = 9;
+			// 
+			// button7
+			// 
+			this->button7->BackColor = System::Drawing::Color::Plum;
+			this->button7->Cursor = System::Windows::Forms::Cursors::Hand;
+			this->button7->Location = System::Drawing::Point(479, 74);
+			this->button7->Name = L"button7";
+			this->button7->Size = System::Drawing::Size(150, 23);
+			this->button7->TabIndex = 17;
+			this->button7->Text = L"Submit";
+			this->button7->UseVisualStyleBackColor = false;
+			this->button7->Click += gcnew System::EventHandler(this, &ProjectForm::button7_Click);
+			// 
+			// label4
+			// 
+			this->label4->AutoSize = true;
+			this->label4->Location = System::Drawing::Point(12, 79);
+			this->label4->Name = L"label4";
+			this->label4->Size = System::Drawing::Size(63, 13);
+			this->label4->TabIndex = 16;
+			this->label4->Text = L"Path to File:";
+			// 
+			// textBox1
+			// 
+			this->textBox1->Location = System::Drawing::Point(80, 76);
+			this->textBox1->Name = L"textBox1";
+			this->textBox1->Size = System::Drawing::Size(390, 20);
+			this->textBox1->TabIndex = 15;
+			// 
+			// button6
+			// 
+			this->button6->BackColor = System::Drawing::Color::LightSalmon;
+			this->button6->Cursor = System::Windows::Forms::Cursors::Hand;
+			this->button6->Location = System::Drawing::Point(479, 38);
+			this->button6->Name = L"button6";
+			this->button6->Size = System::Drawing::Size(150, 23);
+			this->button6->TabIndex = 14;
+			this->button6->Text = L"Face From File...";
+			this->button6->UseVisualStyleBackColor = false;
+			this->button6->Click += gcnew System::EventHandler(this, &ProjectForm::button6_Click);
 			// 
 			// label3
 			// 
 			this->label3->AutoSize = true;
-			this->label3->Location = System::Drawing::Point(355, 43);
+			this->label3->Location = System::Drawing::Point(347, 43);
 			this->label3->Name = L"label3";
-			this->label3->Size = System::Drawing::Size(43, 13);
+			this->label3->Size = System::Drawing::Size(46, 13);
 			this->label3->TabIndex = 13;
-			this->label3->Text = L"minSize";
+			this->label3->Text = L"minSize:";
 			// 
 			// numericUpDown3
 			// 
-			this->numericUpDown3->Location = System::Drawing::Point(404, 41);
+			this->numericUpDown3->Location = System::Drawing::Point(396, 41);
 			this->numericUpDown3->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 250, 0, 0, 0 });
 			this->numericUpDown3->Name = L"numericUpDown3";
 			this->numericUpDown3->Size = System::Drawing::Size(75, 20);
@@ -255,13 +304,13 @@ namespace opencvproject {
 			this->label2->AutoSize = true;
 			this->label2->Location = System::Drawing::Point(161, 43);
 			this->label2->Name = L"label2";
-			this->label2->Size = System::Drawing::Size(71, 13);
+			this->label2->Size = System::Drawing::Size(74, 13);
 			this->label2->TabIndex = 11;
-			this->label2->Text = L"minNeighbors";
+			this->label2->Text = L"minNeighbors:";
 			// 
 			// numericUpDown2
 			// 
-			this->numericUpDown2->Location = System::Drawing::Point(236, 41);
+			this->numericUpDown2->Location = System::Drawing::Point(238, 41);
 			this->numericUpDown2->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 10, 0, 0, 0 });
 			this->numericUpDown2->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 1, 0, 0, 0 });
 			this->numericUpDown2->Name = L"numericUpDown2";
@@ -275,16 +324,16 @@ namespace opencvproject {
 			this->label1->AutoSize = true;
 			this->label1->Location = System::Drawing::Point(12, 43);
 			this->label1->Name = L"label1";
-			this->label1->Size = System::Drawing::Size(62, 13);
+			this->label1->Size = System::Drawing::Size(65, 13);
 			this->label1->TabIndex = 9;
-			this->label1->Text = L"scaleFactor";
+			this->label1->Text = L"scaleFactor:";
 			// 
 			// ProjectForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->BackgroundImage = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"$this.BackgroundImage")));
-			this->ClientSize = System::Drawing::Size(669, 611);
+			this->ClientSize = System::Drawing::Size(669, 661);
 			this->Controls->Add(this->panel1);
 			this->Controls->Add(this->pictureBox1);
 			this->Controls->Add(this->button1);
@@ -306,7 +355,13 @@ namespace opencvproject {
 		}
 #pragma endregion
 private: System::Void ProjectForm_Load(System::Object^  sender, System::EventArgs^  e) {
-	button2->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_purple.png");
+	this->button2->BackColor = System::Drawing::Color::Chartreuse;
+
+	this->button6->BackColor = System::Drawing::Color::Gray;
+	this->button6->Enabled = false;
+
+	this->button7->BackColor = System::Drawing::Color::Gray;
+	this->button7->Enabled = false;
 }
 private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
 	if (button1->Text == L"START") {
@@ -354,13 +409,22 @@ private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e
 				rectangle(frame, censored_black, Scalar(0, 0, 0), CV_FILLED);
 			}
 
-			if (choice == 4) {
-				Rect firstFace;
-				if (faces.size() > 0) firstFace = faces[0];
+			if (choice == 4 || choice == 5) {
+				Mat face;
+				//string facesPath = "C:/Users/Mariusz/Desktop/opencv_tmp/projekt/twarze/";
+				//string wantedFace = facesPath + "chuck_norris.png";
+				//string facePath = "";
+				
+				if (faces.size() > 0) {
+					if (choice == 4) {
+						Rect firstFace = faces[0];
+						face = frame(firstFace);
+					}
+					if (choice == 5) {
+						face = imread(facePath);
+					}
 
-				if (faces.size() > 1 && !firstFace.empty()) {
-					Mat face = frame(firstFace);
-					if (i > 0 && !face.empty()) {
+					if (!face.empty()) {
 						resize(face, face, cv::Size(faces[i].width, faces[i].height), 0, 0, INTER_CUBIC);
 						face.copyTo(frame(faces[i]));
 					}
@@ -378,31 +442,62 @@ private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e
 }
 private: System::Void button2_Click(System::Object^  sender, System::EventArgs^  e) {
 	choice = 1;
-	button2->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_purple.png");
-	button3->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_green.png");
-	button4->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_green.png");
-	button5->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_green.png");
+	this->button2->BackColor = System::Drawing::Color::Chartreuse;
+	this->button3->BackColor = System::Drawing::Color::Gray;
+	this->button4->BackColor = System::Drawing::Color::Gray;
+	this->button5->BackColor = System::Drawing::Color::Gray;
+
+	this->button6->BackColor = System::Drawing::Color::Gray;
+	this->button6->Enabled = false;
+
+	this->button7->BackColor = System::Drawing::Color::Gray;
+	this->button7->Enabled = false;
 }
 private: System::Void button3_Click(System::Object^  sender, System::EventArgs^  e) {
 	choice = 2;
-	button2->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_green.png");
-	button3->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_purple.png");	
-	button4->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_green.png");
-	button5->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_green.png");
+	this->button2->BackColor = System::Drawing::Color::Gray;
+	this->button3->BackColor = System::Drawing::Color::Chartreuse;
+	this->button4->BackColor = System::Drawing::Color::Gray;
+	this->button5->BackColor = System::Drawing::Color::Gray;
+
+	this->button6->BackColor = System::Drawing::Color::Gray;
+	this->button6->Enabled = false;
+
+	this->button7->BackColor = System::Drawing::Color::Gray;
+	this->button7->Enabled = false;
 }
 private: System::Void button4_Click(System::Object^  sender, System::EventArgs^  e) {
 	choice = 3;
-	button2->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_green.png");
-	button3->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_green.png");
-	button4->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_purple.png");
-	button5->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_green.png");
+	this->button2->BackColor = System::Drawing::Color::Gray;
+	this->button3->BackColor = System::Drawing::Color::Gray;
+	this->button4->BackColor = System::Drawing::Color::Chartreuse;
+	this->button5->BackColor = System::Drawing::Color::Gray;
+
+	this->button6->BackColor = System::Drawing::Color::Gray;
+	this->button6->Enabled = false;
+
+	this->button7->BackColor = System::Drawing::Color::Gray;
+	this->button7->Enabled = false;
 }
 private: System::Void button5_Click(System::Object^  sender, System::EventArgs^  e) {
 	choice = 4;
-	button2->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_green.png");
-	button3->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_green.png");
-	button4->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_green.png");	
-	button5->BackgroundImage = System::Drawing::Image::FromFile("C:/Users/Mariusz/Desktop/opencv_tmp/projekt/guziki/button_purple.png");
+	this->button2->BackColor = System::Drawing::Color::Gray;
+	this->button3->BackColor = System::Drawing::Color::Gray;
+	this->button4->BackColor = System::Drawing::Color::Gray;
+	this->button5->BackColor = System::Drawing::Color::Chartreuse;
+
+	this->button6->BackColor = System::Drawing::Color::LightSalmon;
+	this->button6->Enabled = true;
+
+	this->button7->BackColor = System::Drawing::Color::Plum;
+	this->button7->Enabled = true;
+}
+private: System::Void button6_Click(System::Object^  sender, System::EventArgs^  e) {
+	choice = 5;
+}
+private: System::Void button7_Click(System::Object^  sender, System::EventArgs^  e) {
+	msclr::interop::marshal_context context;
+	facePath = context.marshal_as<std::string>(this->textBox1->Text);
 }
 private: System::Void numericUpDown1_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
 	scaleFactor = (double) numericUpDown1->Value;
