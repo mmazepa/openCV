@@ -34,6 +34,9 @@ namespace opencvproject {
 	string facePath = "";
 	VideoWriter outputVideo;
 
+	int mouseX = 0;
+	int mouseY = 0;
+
 	public ref class ProjectForm : public System::Windows::Forms::Form
 	{
 	public:
@@ -136,6 +139,7 @@ namespace opencvproject {
 			this->pictureBox1->Size = System::Drawing::Size(640, 480);
 			this->pictureBox1->TabIndex = 3;
 			this->pictureBox1->TabStop = false;
+			this->pictureBox1->MouseDown += gcnew System::Windows::Forms::MouseEventHandler(this, &ProjectForm::pictureBox1_MouseDown);
 			// 
 			// timer1
 			// 
@@ -431,8 +435,18 @@ private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e
 				
 				if (faces.size() > 0) {
 					if (choice == 4) {
-						Rect firstFace = faces[0];
-						face = frame(firstFace);
+						if (mouseX == 0 && mouseY == 0) {
+							Rect firstFace = faces[0];
+							face = frame(firstFace);
+						} else {
+							for (Rect aface : faces) {
+								if (mouseX >= aface.x && mouseY >= aface.y) {
+									if (mouseX <= aface.x + aface.width && mouseY <= aface.y + aface.height) {
+										face = frame(aface);
+									}
+								}
+							}
+						}
 					}
 					if (choice == 5) {
 						face = imread(facePath);
@@ -541,6 +555,11 @@ private: System::Void numericUpDown2_ValueChanged(System::Object^  sender, Syste
 }
 private: System::Void numericUpDown3_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
 	minSize = (int) numericUpDown3->Value;
+}
+private: System::Void pictureBox1_MouseDown(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e) {
+	System::Drawing::Point point = e->Location;
+	mouseX = point.X;
+	mouseY = point.Y;
 }
 };
 }
