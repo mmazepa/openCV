@@ -74,6 +74,8 @@ namespace opencvproject {
 	private: System::Windows::Forms::Label^  label4;
 	private: System::Windows::Forms::TextBox^  textBox1;
 	private: System::Windows::Forms::Button^  button8;
+	private: System::Windows::Forms::RadioButton^  radioButton2;
+	private: System::Windows::Forms::RadioButton^  radioButton1;
 
 	private: System::ComponentModel::IContainer^  components;
 
@@ -91,6 +93,8 @@ namespace opencvproject {
 			this->button5 = (gcnew System::Windows::Forms::Button());
 			this->numericUpDown1 = (gcnew System::Windows::Forms::NumericUpDown());
 			this->panel1 = (gcnew System::Windows::Forms::Panel());
+			this->radioButton2 = (gcnew System::Windows::Forms::RadioButton());
+			this->radioButton1 = (gcnew System::Windows::Forms::RadioButton());
 			this->button7 = (gcnew System::Windows::Forms::Button());
 			this->label4 = (gcnew System::Windows::Forms::Label());
 			this->textBox1 = (gcnew System::Windows::Forms::TextBox());
@@ -228,6 +232,8 @@ namespace opencvproject {
 			this->panel1->BackColor = System::Drawing::Color::Transparent;
 			this->panel1->BackgroundImage = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"panel1.BackgroundImage")));
 			this->panel1->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
+			this->panel1->Controls->Add(this->radioButton2);
+			this->panel1->Controls->Add(this->radioButton1);
 			this->panel1->Controls->Add(this->button7);
 			this->panel1->Controls->Add(this->label4);
 			this->panel1->Controls->Add(this->textBox1);
@@ -246,6 +252,30 @@ namespace opencvproject {
 			this->panel1->Name = L"panel1";
 			this->panel1->Size = System::Drawing::Size(640, 110);
 			this->panel1->TabIndex = 9;
+			// 
+			// radioButton2
+			// 
+			this->radioButton2->AutoSize = true;
+			this->radioButton2->Location = System::Drawing::Point(350, 86);
+			this->radioButton2->Name = L"radioButton2";
+			this->radioButton2->Size = System::Drawing::Size(52, 17);
+			this->radioButton2->TabIndex = 19;
+			this->radioButton2->Text = L"Video";
+			this->radioButton2->UseVisualStyleBackColor = true;
+			this->radioButton2->CheckedChanged += gcnew System::EventHandler(this, &ProjectForm::radioButton2_CheckedChanged);
+			// 
+			// radioButton1
+			// 
+			this->radioButton1->AutoSize = true;
+			this->radioButton1->Checked = true;
+			this->radioButton1->Location = System::Drawing::Point(350, 67);
+			this->radioButton1->Name = L"radioButton1";
+			this->radioButton1->Size = System::Drawing::Size(61, 17);
+			this->radioButton1->TabIndex = 18;
+			this->radioButton1->TabStop = true;
+			this->radioButton1->Text = L"Camera";
+			this->radioButton1->UseVisualStyleBackColor = true;
+			this->radioButton1->CheckedChanged += gcnew System::EventHandler(this, &ProjectForm::radioButton1_CheckedChanged);
 			// 
 			// button7
 			// 
@@ -272,7 +302,7 @@ namespace opencvproject {
 			// 
 			this->textBox1->Location = System::Drawing::Point(80, 76);
 			this->textBox1->Name = L"textBox1";
-			this->textBox1->Size = System::Drawing::Size(390, 20);
+			this->textBox1->Size = System::Drawing::Size(233, 20);
 			this->textBox1->TabIndex = 15;
 			// 
 			// button6
@@ -387,7 +417,12 @@ private: System::Void ProjectForm_Load(System::Object^  sender, System::EventArg
 private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
 	if (button1->Text == L"START") {
 		timer1->Start();
-		if (!cap.isOpened()) cap.open(0);
+		if (!cap.isOpened()) {
+			if (radioButton1->Checked == true)
+				cap.open(0);
+			else if (radioButton2->Checked == true)
+				cap.open("C:/Users/Mariusz/Desktop/opencv_tmp/faces_sample.mp4");
+		}
 		button1->Text = L"STOP";
 	} else if (button1->Text == L"STOP") {
 		timer1->Stop();
@@ -560,6 +595,14 @@ private: System::Void pictureBox1_MouseDown(System::Object^  sender, System::Win
 	System::Drawing::Point point = e->Location;
 	mouseX = point.X;
 	mouseY = point.Y;
+}
+private: System::Void radioButton1_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
+	cap.release();
+	cap.open(0);
+}
+private: System::Void radioButton2_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
+	cap.release();
+	cap.open("C:/Users/Mariusz/Desktop/opencv_tmp/faces_sample.mp4");
 }
 };
 }
