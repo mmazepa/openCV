@@ -16,6 +16,8 @@ namespace opencvproject {
 	using namespace System::Data;
 	using namespace System::Drawing;
 	
+	using namespace System::IO;
+
 	using namespace cv;
 	using namespace std;
 
@@ -256,7 +258,7 @@ namespace opencvproject {
 			// radioButton2
 			// 
 			this->radioButton2->AutoSize = true;
-			this->radioButton2->Location = System::Drawing::Point(350, 86);
+			this->radioButton2->Location = System::Drawing::Point(15, 86);
 			this->radioButton2->Name = L"radioButton2";
 			this->radioButton2->Size = System::Drawing::Size(52, 17);
 			this->radioButton2->TabIndex = 19;
@@ -268,7 +270,7 @@ namespace opencvproject {
 			// 
 			this->radioButton1->AutoSize = true;
 			this->radioButton1->Checked = true;
-			this->radioButton1->Location = System::Drawing::Point(350, 67);
+			this->radioButton1->Location = System::Drawing::Point(15, 67);
 			this->radioButton1->Name = L"radioButton1";
 			this->radioButton1->Size = System::Drawing::Size(61, 17);
 			this->radioButton1->TabIndex = 18;
@@ -285,14 +287,14 @@ namespace opencvproject {
 			this->button7->Name = L"button7";
 			this->button7->Size = System::Drawing::Size(150, 23);
 			this->button7->TabIndex = 17;
-			this->button7->Text = L"Submit";
+			this->button7->Text = L"Browse...";
 			this->button7->UseVisualStyleBackColor = false;
 			this->button7->Click += gcnew System::EventHandler(this, &ProjectForm::button7_Click);
 			// 
 			// label4
 			// 
 			this->label4->AutoSize = true;
-			this->label4->Location = System::Drawing::Point(12, 79);
+			this->label4->Location = System::Drawing::Point(84, 77);
 			this->label4->Name = L"label4";
 			this->label4->Size = System::Drawing::Size(63, 13);
 			this->label4->TabIndex = 16;
@@ -300,9 +302,10 @@ namespace opencvproject {
 			// 
 			// textBox1
 			// 
-			this->textBox1->Location = System::Drawing::Point(80, 76);
+			this->textBox1->Location = System::Drawing::Point(149, 74);
 			this->textBox1->Name = L"textBox1";
-			this->textBox1->Size = System::Drawing::Size(233, 20);
+			this->textBox1->ReadOnly = true;
+			this->textBox1->Size = System::Drawing::Size(322, 20);
 			this->textBox1->TabIndex = 15;
 			// 
 			// button6
@@ -313,7 +316,7 @@ namespace opencvproject {
 			this->button6->Name = L"button6";
 			this->button6->Size = System::Drawing::Size(150, 23);
 			this->button6->TabIndex = 14;
-			this->button6->Text = L"Face From File...";
+			this->button6->Text = L"Face From File";
 			this->button6->UseVisualStyleBackColor = false;
 			this->button6->Click += gcnew System::EventHandler(this, &ProjectForm::button6_Click);
 			// 
@@ -552,7 +555,7 @@ private: System::Void button5_Click(System::Object^  sender, System::EventArgs^ 
 	this->button4->BackColor = System::Drawing::Color::Gray;
 	this->button5->BackColor = System::Drawing::Color::Chartreuse;
 
-	this->button6->BackColor = System::Drawing::Color::LightSalmon;
+	this->button6->BackColor = System::Drawing::Color::Gray;
 	this->button6->Enabled = true;
 
 	this->button7->BackColor = System::Drawing::Color::Plum;
@@ -560,10 +563,27 @@ private: System::Void button5_Click(System::Object^  sender, System::EventArgs^ 
 }
 private: System::Void button6_Click(System::Object^  sender, System::EventArgs^  e) {
 	choice = 5;
+	this->button2->BackColor = System::Drawing::Color::Gray;
+	this->button3->BackColor = System::Drawing::Color::Gray;
+	this->button4->BackColor = System::Drawing::Color::Gray;
+	this->button5->BackColor = System::Drawing::Color::Gray;
+
+	this->button6->BackColor = System::Drawing::Color::Chartreuse;
 }
 private: System::Void button7_Click(System::Object^  sender, System::EventArgs^  e) {
-	msclr::interop::marshal_context context;
-	facePath = context.marshal_as<std::string>(this->textBox1->Text);
+	OpenFileDialog^ openFileDialog = gcnew OpenFileDialog;
+	openFileDialog->Filter = "Image files (*.jpg;*.png;*.bmp) | *.jpg;*.png;*.bmp | All files | *.*";
+	openFileDialog->FilterIndex = 1;
+	openFileDialog->RestoreDirectory = true;
+
+	if (openFileDialog->ShowDialog() == System::Windows::Forms::DialogResult::OK) {
+		this->textBox1->Text = openFileDialog->FileName;
+		msclr::interop::marshal_context context;
+		facePath = context.marshal_as<std::string>(openFileDialog->FileName);
+
+		this->textBox1->SelectionStart = this->textBox1->Text->Length;
+		this->textBox1->SelectionLength = 0;
+	}
 }
 private: System::Void button8_Click(System::Object^  sender, System::EventArgs^  e) {
 	if (button8->Text == "Record Video") {
