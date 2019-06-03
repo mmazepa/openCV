@@ -425,10 +425,9 @@ private: System::Void button1_Click(System::Object^  sender, System::EventArgs^ 
 	if (button1->Text == L"START") {
 		timer1->Start();
 		if (!cap.isOpened()) {
-			if (radioButton1->Checked == true)
-				cap.open(0);
-			else if (radioButton2->Checked == true)
-				cap.open("C:/Users/Mariusz/Desktop/opencv_tmp/faces_sample.mp4");
+			if (!radioButton1->Checked == true)
+				radioButton1->Checked = true;
+			cap.open(0);
 		}
 		button1->Text = L"STOP";
 	} else if (button1->Text == L"STOP") {
