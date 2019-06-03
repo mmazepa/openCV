@@ -23,6 +23,7 @@ namespace opencvproject {
 
 	VideoCapture cap;
 	Mat frame, gray;
+	Mat modFrame;
 
 	int choice = 1;
 
@@ -38,6 +39,9 @@ namespace opencvproject {
 
 	int mouseX = 0;
 	int mouseY = 0;
+
+	vector<Rect> faces;
+	int faceCounter = 1;
 
 	public ref class ProjectForm : public System::Windows::Forms::Form
 	{
@@ -442,10 +446,10 @@ private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e
 			cap.set(CAP_PROP_POS_FRAMES, 0);
 			cap >> frame;
 		}
+		modFrame = frame.clone();
 		cvtColor(frame, gray, CV_RGB2GRAY);
 		equalizeHist(gray, gray);
 
-		vector<Rect> faces;
 		cv::Size newMinSize = cv::Size(minSize, minSize);
 
 		face_cascade.detectMultiScale(gray, faces, scaleFactor, minNeighbors, 0, newMinSize);
@@ -455,17 +459,17 @@ private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e
 
 			if (choice == 1) {
 				cv::Point center(faces[i].x + faces[i].width / 2, faces[i].y + faces[i].height / 2);
-				circle(frame, center, face_radius, Scalar(0, 100, 0), 3);
+				circle(modFrame, center, face_radius, Scalar(0, 100, 0), 3);
 			}
 
 			if (choice == 2)
-				GaussianBlur(frame(faces[i]), frame(faces[i]), cv::Size(0, 0), 10);
+				GaussianBlur(modFrame(faces[i]), modFrame(faces[i]), cv::Size(0, 0), 10);
 
 			if (choice == 3) {
 				int y = faces[i].y + face_radius/2;
 				int height = faces[i].height * 0.3;
 				Rect censored_black = Rect(faces[i].x, y, faces[i].width, height);
-				rectangle(frame, censored_black, Scalar(0, 0, 0), CV_FILLED);
+				rectangle(modFrame, censored_black, Scalar(0, 0, 0), CV_FILLED);
 			}
 
 			if (choice == 4 || choice == 5) {
@@ -475,34 +479,35 @@ private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e
 					if (choice == 4) {
 						if (mouseX == 0 && mouseY == 0) {
 							Rect firstFace = faces[0];
-							face = frame(firstFace);
+							face = modFrame(firstFace);
 						} else {
 							for (Rect aface : faces) {
 								if (mouseX >= aface.x && mouseY >= aface.y) {
 									if (mouseX <= aface.x + aface.width && mouseY <= aface.y + aface.height) {
-										face = frame(aface);
+										face = modFrame(aface);
 									}
 								}
 							}
 						}
 					}
+					
 					if (choice == 5) {
 						face = imread(facePath);
 					}
 
 					if (!face.empty()) {
 						resize(face, face, cv::Size(faces[i].width, faces[i].height), 0, 0, INTER_CUBIC);
-						face.copyTo(frame(faces[i]));
+						face.copyTo(modFrame(faces[i]));
 					}
 				}
 			}
 		}
 
-		if (!frame.empty()) {
-			pictureBox1->Image = gcnew System::Drawing::Bitmap(frame.cols, frame.rows, frame.step, System::Drawing::Imaging::PixelFormat::Format24bppRgb, (System::IntPtr) frame.data);
+		if (!modFrame.empty()) {
+			pictureBox1->Image = gcnew System::Drawing::Bitmap(modFrame.cols, modFrame.rows, modFrame.step, System::Drawing::Imaging::PixelFormat::Format24bppRgb, (System::IntPtr) modFrame.data);
 			pictureBox1->Refresh();
 			if (outputVideo.isOpened()) {
-				outputVideo.write(frame);
+				outputVideo.write(modFrame);
 			}
 		}
 	} catch (cv::Exception e) {
@@ -572,6 +577,7 @@ private: System::Void button6_Click(System::Object^  sender, System::EventArgs^ 
 }
 private: System::Void button7_Click(System::Object^  sender, System::EventArgs^  e) {
 	OpenFileDialog^ openFileDialog = gcnew OpenFileDialog;
+	
 	openFileDialog->Filter = "Image files (*.jpg;*.png;*.bmp) | *.jpg;*.png;*.bmp | All files | *.*";
 	openFileDialog->FilterIndex = 1;
 	openFileDialog->RestoreDirectory = true;
@@ -615,14 +621,43 @@ private: System::Void pictureBox1_MouseDown(System::Object^  sender, System::Win
 	System::Drawing::Point point = e->Location;
 	mouseX = point.X;
 	mouseY = point.Y;
+
+	if (choice == 4) {
+		string path = "C:/Users/Mariusz/Desktop/opencv_tmp/projekt/twarze/";
+		for (Rect aface : faces) {
+			if (mouseX >= aface.x && mouseY >= aface.y) {
+				if (mouseX <= aface.x + aface.width && mouseY <= aface.y + aface.height) {
+					string filename = "face_no-" + to_string(faceCounter) + ".jpg";
+					imwrite(path + filename, frame(aface));
+					faceCounter++;
+				}
+			}
+		}
+	}
 }
 private: System::Void radioButton1_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
 	cap.release();
 	cap.open(0);
 }
 private: System::Void radioButton2_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
-	cap.release();
-	cap.open("C:/Users/Mariusz/Desktop/opencv_tmp/faces_sample.mp4");
+	OpenFileDialog^ openFileDialog = gcnew OpenFileDialog;
+
+	if (this->radioButton2->Checked == true) {
+		openFileDialog->Filter = "Video files (*.avi;*.mp4;) | *.avi;*.mp4; | All files | *.*";
+		openFileDialog->FilterIndex = 1;
+		openFileDialog->RestoreDirectory = true;
+
+		string videoFilePath = "";
+		if (openFileDialog->ShowDialog() == System::Windows::Forms::DialogResult::OK) {
+			cap.release();
+			msclr::interop::marshal_context context;
+			videoFilePath = context.marshal_as<std::string>(openFileDialog->FileName);
+			cap.open(videoFilePath);
+		} else {
+			this->radioButton2->Checked = false;
+			this->radioButton1->Checked = true;
+		}
+	}
 }
 };
 }
