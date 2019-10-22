@@ -73,6 +73,6 @@ cyfrowych i sekwencji wideo w OpenCV w roku akademickim 2018/2019.
 	<tr>
 		<td>Projekt</td>
 		<td>03.06.2019</td>
-		<td>-</td>
+		<td>100%</td>
 	</tr>
 </table>
